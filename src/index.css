@@ -91,7 +91,7 @@ body {
 .nav-item.active { background: var(--color-accent-muted); color: var(--color-accent); font-weight: 600; }
 @media (max-width: 768px) {
   .nav-brand { display: none; }
-  .nav-item { padding: 0.4rem 0.75rem; margin: 0; font-size: 0.8rem; }
+  .nav-item { padding: 0.45rem 0.6rem; margin: 0; font-size: 0.8rem; justify-content: center; }
   .nav-item span.nav-label { display: none; }
 }
 
@@ -174,6 +174,9 @@ td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--color-divider); }
 /* Grid utilities */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 768px) {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard, Droplets, Calculator, Timer, BookOpen, BookMarked, Settings,
+  LayoutDashboard, Droplets, Calculator, Timer, BookOpen, BookMarked, Settings, Beaker,
 } from 'lucide-react'
 
 const NAV = [
@@ -8,6 +8,7 @@ const NAV = [
   { to: '/reference', icon: BookMarked, label: 'Reference' },
   { to: '/parameters', icon: Droplets, label: 'Checker' },
   { to: '/calculator', icon: Calculator, label: 'TDS Calc' },
+  { to: '/remineralize', icon: Beaker, label: 'Remineralize' },
   { to: '/breeding', icon: Timer, label: 'Breeding' },
   { to: '/logbook', icon: BookOpen, label: 'Logbook' },
   { to: '/settings', icon: Settings, label: 'Settings' },

@@ -2,18 +2,20 @@
 
 **A local-first toolkit for freshwater shrimp keepers and breeders.**
 
-Shrimp Lab is an open-source, client-side web app built for Neocaridina and Caridina shrimp hobbyists. It includes water parameter references, calculators, breeding estimators, and simple local logs — with **no account, no API, and no cloud lock-in**.
+Shrimp Lab is an open-source, client-side web app built for Neocaridina and Caridina shrimp hobbyists. It includes water parameter references, calculators, breeding estimators, remineralization planning, and simple local logs — with **no account, no API, and no cloud lock-in**.
 
 ## Features
 
 - 📋 **Species Reference** — Target water parameters for Neocaridina and Caridina with stability notes
 - 🧪 **Parameter Checker** — Compare your tank values against species target ranges with color-coded feedback
 - 💧 **TDS Water Change Calculator** — Calculate optimal water change percentage to hit target TDS
-- 🥚 **Breeding Timeline** — Estimate hatch windows from berried dates and tank temperature
-- 📖 **Logbook** — Record water tests, molts, deaths, berried females, shrimplet sightings with filters
-- 🐟 **Tank Profiles** — Manage multiple tanks (Neo, Caridina, cull, grow-out)
-- 📦 **Import / Export** — JSON backup and restore for your entire dataset
+- ⚗️ **Remineralization Planner** — Calculate exact remineralizer dosage for RO/DI water with product presets
+- 🥚 **Breeding Timeline** — Estimate hatch windows from berried dates and tank temperature, track active berried females
+- 📖 **Logbook** — Record water tests, molts, deaths, berried females, shrimplet sightings with filters, edit existing entries
+- 🐟 **Tank Profiles** — Manage multiple tanks (Neo, Caridina, cull, grow-out) with inline editing
+- 📦 **Import / Export** — JSON backup/restore for your entire dataset + CSV export for log entries
 - 🌙 **Dark + Light Mode** — Aquatic-themed color palette for both
+- 📊 **Dashboard** — At-a-glance view with stats, active breeding alerts, tank parameter snapshots, and recent activity
 
 ## Quick Start
 
@@ -48,24 +50,25 @@ Deploy the `dist/` folder to GitHub Pages, Vercel, or any static host.
 src/
 ├── components/
 │   └── layout/
-│       └── Sidebar.tsx       # Navigation sidebar
+│       └── Sidebar.tsx              # Navigation sidebar
 ├── lib/
-│   ├── types.ts              # TypeScript types
-│   ├── species.ts            # Species reference data + helpers
-│   ├── calculators.ts        # Calculation utilities (TDS, hatching, parameters)
-│   ├── db.ts                 # localStorage persistence layer
-│   └── DataContext.tsx        # React context for app state
+│   ├── types.ts                     # TypeScript types
+│   ├── species.ts                   # Species reference data + helpers
+│   ├── calculators.ts               # Calculation utilities (TDS, hatching, parameters, remineralization, CSV)
+│   ├── db.ts                        # localStorage persistence layer
+│   └── DataContext.tsx              # React context for app state
 ├── pages/
-│   ├── Dashboard.tsx         # Home page with stats and quick actions
-│   ├── Reference.tsx         # Species parameter reference
-│   ├── ParameterChecker.tsx  # Tank value vs target range checker
-│   ├── TdsCalculator.tsx     # Water change calculator
-│   ├── BreedingTimeline.tsx  # Berried → hatch timeline estimator
-│   ├── Logbook.tsx           # Full logbook with category filters
-│   └── Settings.tsx          # Tank profiles, theme, import/export
-├── App.tsx                   # Router and layout
-├── main.tsx                  # Entry point
-└── index.css                 # Global styles and design tokens
+│   ├── Dashboard.tsx                # Home page with stats, breeding alerts, parameter snapshots, recent activity
+│   ├── Reference.tsx                # Species parameter reference cards
+│   ├── ParameterChecker.tsx         # Tank value vs target range checker
+│   ├── TdsCalculator.tsx            # Water change calculator
+│   ├── RemineralizationPlanner.tsx  # RO/DI remineralizer dosage calculator
+│   ├── BreedingTimeline.tsx         # Berried → hatch timeline estimator with tracking
+│   ├── Logbook.tsx                  # Full logbook with category filters and edit support
+│   └── Settings.tsx                 # Tank profiles, theme, units, import/export
+├── App.tsx                          # Router and layout
+├── main.tsx                         # Entry point
+└── index.css                        # Global styles and design tokens
 ```
 
 ## Default Parameter Targets
@@ -99,15 +102,16 @@ src/
 
 ## Future Ideas
 
-- Remineralization planner (GH/KH target from RO/DI)
 - Printable parameter cards
 - Colony population estimator
 - Breeding line tracker with genetics
 - PWA / offline install support
-- CSV export for logs
-- Dashboard summary widgets with charts
+- Dashboard charts for parameter trends over time
 - Photo attachments for log entries
 - Multi-language support
+- Water test reminders / schedule
+- Feeding log category
+- TDS creep analyzer (track TDS rise between water changes)
 
 ## License
 

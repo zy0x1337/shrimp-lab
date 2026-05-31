@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Reference } from './pages/Reference'
 import { ParameterChecker } from './pages/ParameterChecker'
 import { TdsCalculator } from './pages/TdsCalculator'
+import { RemineralizationPlanner } from './pages/RemineralizationPlanner'
 import { BreedingTimeline } from './pages/BreedingTimeline'
 import { Logbook } from './pages/Logbook'
 import { SettingsPage } from './pages/Settings'
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="reference" element={<Reference />} />
             <Route path="parameters" element={<ParameterChecker />} />
             <Route path="calculator" element={<TdsCalculator />} />
+            <Route path="remineralize" element={<RemineralizationPlanner />} />
             <Route path="breeding" element={<BreedingTimeline />} />
             <Route path="logbook" element={<Logbook />} />
             <Route path="settings" element={<SettingsPage />} />

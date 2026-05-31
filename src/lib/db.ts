@@ -58,6 +58,12 @@ export function addLog(data: AppData, entry: Omit<LogEntry, 'id'>): AppData {
   return updated
 }
 
+export function updateLog(data: AppData, id: string, patch: Partial<LogEntry>): AppData {
+  const updated = { ...data, logs: data.logs.map(l => l.id === id ? { ...l, ...patch } : l) }
+  saveData(updated)
+  return updated
+}
+
 export function deleteLog(data: AppData, id: string): AppData {
   const updated = { ...data, logs: data.logs.filter(l => l.id !== id) }
   saveData(updated)

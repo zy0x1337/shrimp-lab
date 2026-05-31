@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useData } from '../lib/DataContext'
 import { CATEGORY_LABELS, CATEGORY_ICONS } from '../lib/species'
-import type { LogCategory } from '../lib/types'
-import { Plus, X } from 'lucide-react'
+import type { LogCategory, LogEntry } from '../lib/types'
+import { Plus, X, Pencil } from 'lucide-react'
 
 const CATEGORIES: LogCategory[] = ['water_test', 'molt', 'death', 'berried', 'shrimplets', 'maintenance', 'note']
 
 export function Logbook() {
-  const { data, addLog, deleteLog } = useData()
+  const { data, addLog, updateLog, deleteLog } = useData()
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [tankId, setTankId] = useState(data.tanks[0]?.id ?? '')
   const [category, setCategory] = useState<LogCategory>('water_test')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -16,29 +17,80 @@ export function Logbook() {
   const [vals, setVals] = useState({ tds: '', gh: '', kh: '', ph: '', tempC: '', count: '', waterChangePct: '' })
   const [filter, setFilter] = useState<LogCategory | ''>('')
 
-  const submit = () => {
-    if (!tankId) return
-    addLog({
-      date, tankId, category, notes: notes || undefined,
-      values: {
-        tds: vals.tds ? parseFloat(vals.tds) : undefined,
-        gh: vals.gh ? parseFloat(vals.gh) : undefined,
-        kh: vals.kh ? parseFloat(vals.kh) : undefined,
-        ph: vals.ph ? parseFloat(vals.ph) : undefined,
-        tempC: vals.tempC ? parseFloat(vals.tempC) : undefined,
-        count: vals.count ? parseInt(vals.count) : undefined,
-        waterChangePct: vals.waterChangePct ? parseFloat(vals.waterChangePct) : undefined,
-      },
-    })
-    setShowForm(false)
+  const resetForm = () => {
+    setEditingId(null)
+    setTankId(data.tanks[0]?.id ?? '')
+    setCategory('water_test')
+    setDate(new Date().toISOString().slice(0, 10))
     setNotes('')
     setVals({ tds: '', gh: '', kh: '', ph: '', tempC: '', count: '', waterChangePct: '' })
+    setShowForm(false)
+  }
+
+  const openNew = () => {
+    resetForm()
+    setShowForm(true)
+  }
+
+  const openEdit = (log: LogEntry) => {
+    setEditingId(log.id)
+    setTankId(log.tankId)
+    setCategory(log.category)
+    setDate(log.date)
+    setNotes(log.notes ?? '')
+    setVals({
+      tds: log.values?.tds?.toString() ?? '',
+      gh: log.values?.gh?.toString() ?? '',
+      kh: log.values?.kh?.toString() ?? '',
+      ph: log.values?.ph?.toString() ?? '',
+      tempC: log.values?.tempC?.toString() ?? '',
+      count: log.values?.count?.toString() ?? '',
+      waterChangePct: log.values?.waterChangePct?.toString() ?? '',
+    })
+    setShowForm(true)
+  }
+
+  const submit = () => {
+    if (!tankId) return
+
+    const entryValues = {
+      tds: vals.tds ? parseFloat(vals.tds) : undefined,
+      gh: vals.gh ? parseFloat(vals.gh) : undefined,
+      kh: vals.kh ? parseFloat(vals.kh) : undefined,
+      ph: vals.ph ? parseFloat(vals.ph) : undefined,
+      tempC: vals.tempC ? parseFloat(vals.tempC) : undefined,
+      count: vals.count ? parseInt(vals.count) : undefined,
+      waterChangePct: vals.waterChangePct ? parseFloat(vals.waterChangePct) : undefined,
+    }
+
+    if (editingId) {
+      updateLog(editingId, {
+        date, tankId, category, notes: notes || undefined, values: entryValues,
+      })
+    } else {
+      addLog({
+        date, tankId, category, notes: notes || undefined, values: entryValues,
+      })
+    }
+    resetForm()
   }
 
   const logs = [...data.logs]
     .filter(l => !filter || l.category === filter)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 100)
+
+  const formatParamValue = (log: LogEntry): string => {
+    const parts: string[] = []
+    if (log.values?.tds != null) parts.push(`TDS ${log.values.tds}`)
+    if (log.values?.gh != null) parts.push(`GH ${log.values.gh}`)
+    if (log.values?.kh != null) parts.push(`KH ${log.values.kh}`)
+    if (log.values?.ph != null) parts.push(`pH ${log.values.ph}`)
+    if (log.values?.tempC != null) parts.push(`${log.values.tempC}°C`)
+    if (log.values?.count != null) parts.push(`×${log.values.count}`)
+    if (log.values?.waterChangePct != null) parts.push(`${log.values.waterChangePct}% WC`)
+    return parts.join(' · ') || '—'
+  }
 
   return (
     <div>
@@ -47,7 +99,7 @@ export function Logbook() {
           <h1 className="page-title">Logbook</h1>
           <p className="page-subtitle">Record water tests, molts, deaths, berried females, and notes.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)} disabled={data.tanks.length === 0}>
+        <button className="btn btn-primary" onClick={openNew} disabled={data.tanks.length === 0}>
           <Plus size={16} /> New Entry
         </button>
       </div>
@@ -68,13 +120,15 @@ export function Logbook() {
         ))}
       </div>
 
-      {/* New Entry Form */}
+      {/* Entry Form Modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+        <div className="modal-overlay" onClick={resetForm}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px' }}>
             <div className="flex-between mb-2">
-              <h3 style={{ fontWeight: 700, fontSize: '1.1rem' }}>New Log Entry</h3>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowForm(false)}><X size={16} /></button>
+              <h3 style={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                {editingId ? 'Edit Entry' : 'New Log Entry'}
+              </h3>
+              <button className="btn btn-ghost btn-sm" onClick={resetForm}><X size={16} /></button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -136,7 +190,14 @@ export function Logbook() {
                   style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} />
               </div>
 
-              <button className="btn btn-primary" onClick={submit}>Save Entry</button>
+              <div className="flex-row gap-1">
+                <button className="btn btn-primary" onClick={submit}>
+                  {editingId ? 'Update Entry' : 'Save Entry'}
+                </button>
+                {editingId && (
+                  <button className="btn btn-ghost" onClick={resetForm}>Cancel</button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -153,7 +214,7 @@ export function Logbook() {
                 <th>Category</th>
                 <th>Values</th>
                 <th>Notes</th>
-                <th></th>
+                <th style={{ width: '80px' }}></th>
               </tr>
             </thead>
             <tbody>
@@ -168,19 +229,20 @@ export function Logbook() {
                         {CATEGORY_ICONS[log.category]} {CATEGORY_LABELS[log.category]}
                       </span>
                     </td>
-                    <td className="mono text-xs">
-                      {log.values?.tds != null && <span>TDS {log.values.tds} </span>}
-                      {log.values?.gh != null && <span>GH {log.values.gh} </span>}
-                      {log.values?.kh != null && <span>KH {log.values.kh} </span>}
-                      {log.values?.ph != null && <span>pH {log.values.ph} </span>}
-                      {log.values?.tempC != null && <span>{log.values.tempC}°C </span>}
-                      {log.values?.count != null && <span>×{log.values.count} </span>}
-                      {log.values?.waterChangePct != null && <span>{log.values.waterChangePct}% WC </span>}
-                    </td>
+                    <td className="mono text-xs">{formatParamValue(log)}</td>
                     <td className="text-sm" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {log.notes || '—'}
                     </td>
-                    <td><button className="btn btn-danger btn-sm" onClick={() => deleteLog(log.id)}>×</button></td>
+                    <td>
+                      <div className="flex-row gap-1">
+                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(log)} title="Edit">
+                          <Pencil size={14} />
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => deleteLog(log.id)} title="Delete">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 )
               })}

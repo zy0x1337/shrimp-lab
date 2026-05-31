@@ -1,5 +1,5 @@
-import type { ParameterCheck, TdsCalcResult, SpeciesType } from './types'
-import { SPECIES } from './species'
+import type { ParameterCheck, TdsCalcResult, SpeciesType, LogEntry } from './types'
+import { SPECIES, CATEGORY_LABELS } from './species'
 
 // ── Parameter Checker ──────────────────────────────────────────
 
@@ -154,3 +154,87 @@ export function estimateHatch(
 
 export function cToF(c: number): number { return Math.round((c * 9 / 5 + 32) * 10) / 10 }
 export function fToC(f: number): number { return Math.round(((f - 32) * 5 / 9) * 10) / 10 }
+
+// ── Remineralization Planner ───────────────────────────────────
+
+export interface ReminResult {
+  /** Grams of remineralizer to add */
+  gramsGh: number
+  /** Approximate resulting TDS */
+  estimatedTds: number
+  /** Teaspoons (rough, assuming ~5g per level tsp) */
+  tsp: number
+  valid: boolean
+  warning?: string
+}
+
+const REMIN_PRESETS: Record<string, { label: string; gPerGhPer10L: number; tdsPerDegGh: number }> = {
+  'salty-shrimp-gh': { label: 'Salty Shrimp GH+', gPerGhPer10L: 0.3, tdsPerDegGh: 25 },
+  'salty-shrimp-ghkh': { label: 'Salty Shrimp GH/KH+', gPerGhPer10L: 0.35, tdsPerDegGh: 30 },
+  'dennerle-shrimp-king': { label: 'Dennerle Shrimp King', gPerGhPer10L: 0.25, tdsPerDegGh: 22 },
+  'seachem-equilibrium': { label: 'Seachem Equilibrium', gPerGhPer10L: 0.5, tdsPerDegGh: 35 },
+  'custom': { label: 'Custom / Manual', gPerGhPer10L: 0, tdsPerDegGh: 0 },
+}
+
+export function getReminPresets() { return REMIN_PRESETS }
+
+export function calcRemineralization(
+  targetGh: number,
+  targetTds: number,
+  volumeL: number,
+  presetKey: string,
+  customGramsPerGhPer10L?: number,
+  customTdsPerGh?: number,
+  sourceTds?: number, // TDS of source RO/DI water (default 0)
+): ReminResult {
+  if (targetGh <= 0 || targetTds <= 0 || volumeL <= 0) {
+    return { gramsGh: 0, estimatedTds: 0, tsp: 0, valid: false, warning: 'Alle Werte müssen > 0 sein.' }
+  }
+
+  const preset = REMIN_PRESETS[presetKey]
+  if (!preset) return { gramsGh: 0, estimatedTds: 0, tsp: 0, valid: false, warning: 'Unbekanntes Produkt.' }
+
+  let gPerGhPer10L = preset.gPerGhPer10L
+  let tdsPerDegGh = preset.tdsPerDegGh
+
+  if (presetKey === 'custom') {
+    if (!customGramsPerGhPer10L || customGramsPerGhPer10L <= 0) {
+      return { gramsGh: 0, estimatedTds: 0, tsp: 0, valid: false, warning: 'Bitte g/°dGH pro 10L eingeben.' }
+    }
+    gPerGhPer10L = customGramsPerGhPer10L
+    tdsPerDegGh = customTdsPerGh ?? 25
+  }
+
+  const gramsGh = Math.round((gPerGhPer10L * targetGh * (volumeL / 10)) * 100) / 100
+  const estimatedTds = Math.round(((sourceTds ?? 0) + (targetGh * tdsPerDegGh)) * 10) / 10
+  const tsp = Math.round((gramsGh / 5) * 100) / 100
+
+  let warning: string | undefined
+  if (estimatedTds > 300) warning = 'Geschätzter TDS ist sehr hoch. Weniger Remineralizer verwenden oder Ziel-GH reduzieren.'
+  else if (estimatedTds < 50 && targetGh > 2) warning = 'Geschätzter TDS ist sehr niedrig. Produkt und Werte prüfen.'
+
+  return { gramsGh, estimatedTds, tsp, valid: true, warning }
+}
+
+// ── CSV Export ─────────────────────────────────────────────────
+
+export function exportLogsCsv(logs: LogEntry[], tankNames: Record<string, string>): string {
+  const headers = ['Date', 'Tank', 'Category', 'TDS', 'GH', 'KH', 'pH', 'Temp (°C)', 'Count', 'WC %', 'Notes']
+  const rows = logs.map(log => {
+    const tank = tankNames[log.tankId] ?? 'Unknown'
+    return [
+      log.date,
+      tank,
+      CATEGORY_LABELS[log.category] ?? log.category,
+      log.values?.tds ?? '',
+      log.values?.gh ?? '',
+      log.values?.kh ?? '',
+      log.values?.ph ?? '',
+      log.values?.tempC ?? '',
+      log.values?.count ?? '',
+      log.values?.waterChangePct ?? '',
+      (log.notes ?? '').replace(/"/g, '""'),
+    ].map(v => `"${v}"`).join(',')
+  })
+  return [headers.join(','), ...rows].join('\n')
+}
