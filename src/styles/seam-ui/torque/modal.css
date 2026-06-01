@@ -1,0 +1,39 @@
+/*
+ * SEAM UI — styles/torque/modal.css
+ *
+ * Torque modal mechanics:
+ *   — Zero radius on modal shell
+ *   — Gold top border as entry accent
+ *   — Modal title: italic display font
+ *   — Dropdown, drawer, tooltip also covered here
+ */
+
+@layer style {
+
+[data-style="torque"] .modal {
+  border-radius: 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border);
+  border-top: var(--rule-gold-strong);
+}
+[data-style="torque"] .modal-title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+[data-style="torque"] .modal-close,
+[data-style="torque"] .modal-confirm-icon { border-radius: 0; }
+
+[data-style="torque"] .dropdown-menu { border-radius: 0; box-shadow: var(--shadow-lg); border: 1px solid var(--color-border); }
+[data-style="torque"] .dropdown-item { border-radius: 0; font-family: var(--font-body); font-size: var(--text-sm); letter-spacing: 0.02em; }
+[data-style="torque"] .dropdown-item:hover { background: var(--color-surface-offset); }
+
+[data-style="torque"] .drawer-title { font-family: var(--font-display); font-weight: var(--weight-display); font-style: italic; }
+[data-style="torque"] .drawer-bottom { border-radius: 0; border-top: var(--rule-gold-strong); }
+[data-style="torque"] .drawer-close { border-radius: 0; }
+
+[data-style="torque"] .tooltip { border-radius: 0; font-family: var(--font-body); font-size: var(--text-xs); letter-spacing: 0.06em; border: 1px solid var(--color-border); }
+
+} /* end @layer style */

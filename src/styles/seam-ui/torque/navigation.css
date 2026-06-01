@@ -1,0 +1,51 @@
+/*
+ * SEAM UI — styles/torque/navigation.css
+ *
+ * Torque nav mechanics:
+ *   — Hairline border-bottom rule, no radius
+ *   — Brand: italic display font
+ *   — Nav links: UPPERCASE tracked sans, xs size
+ *   — Active state: gold underline grows scaleX(0→1) from left via ::after
+ *   — Hover: text color shifts to --color-text, no background fill
+ */
+
+@layer style {
+
+[data-style="torque"] .nav {
+  background: oklch(from var(--color-bg) l c h / 0.94);
+  border-bottom: var(--rule-hair);
+}
+[data-style="torque"] .nav-brand {
+  font-family: var(--font-display);
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+[data-style="torque"] .nav-link {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  border-radius: 0;
+  position: relative;
+  padding-bottom: calc(var(--space-2) + 2px);
+}
+[data-style="torque"] .nav-link:hover {
+  background: transparent;
+  color: var(--color-text);
+}
+[data-style="torque"] .nav-link.is-active {
+  background: transparent;
+  color: var(--color-primary);
+}
+[data-style="torque"] .nav-link.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+} /* end @layer style */

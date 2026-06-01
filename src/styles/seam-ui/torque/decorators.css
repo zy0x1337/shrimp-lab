@@ -1,0 +1,51 @@
+/*
+ * SEAM UI — styles/torque/decorators.css
+ *
+ * Torque decorator utilities:
+ *   ul-swatch, mono-swatch, color-label, dot-rule, section-rule
+ * All border-radius: 0 — no exceptions.
+ */
+
+@layer style {
+
+[data-style="torque"] .ul-swatch {
+  display: inline-flex; flex-direction: column; align-items: flex-start;
+  gap: 0.25rem; font-family: var(--font-mono); font-size: 0.75rem;
+  font-weight: 400; color: var(--color-text-muted); line-height: 1.4;
+}
+[data-style="torque"] .ul-swatch::after {
+  content: ''; display: block; width: 100%; height: 2px;
+  background: var(--swatch-color, var(--color-primary)); border-radius: 0;
+}
+
+[data-style="torque"] .mono-swatch {
+  display: inline-block; width: 12px; height: 12px;
+  background: var(--swatch-color, var(--color-primary));
+  border: 1px solid var(--color-border); border-radius: 0;
+  flex-shrink: 0; vertical-align: middle; position: relative; top: -1px;
+}
+
+[data-style="torque"] .color-label {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.75rem; line-height: 1;
+}
+[data-style="torque"] .color-label-name { color: var(--color-text-muted); font-weight: 400; }
+[data-style="torque"] .color-label-value { color: var(--color-text-faint); font-weight: 400; }
+
+[data-style="torque"] .dot-rule {
+  border: none; height: 1px;
+  background-image: repeating-linear-gradient(to right, var(--color-border) 0px, var(--color-border) 2px, transparent 2px, transparent 6px);
+  background-size: 6px 1px; background-repeat: repeat-x; background-position: center;
+}
+
+[data-style="torque"] .section-rule {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+}
+[data-style="torque"] .section-rule::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
+[data-style="torque"] .section-rule-label {
+  font-family: var(--font-body); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--color-text-faint); white-space: nowrap; flex-shrink: 0;
+}
+
+} /* end @layer style */

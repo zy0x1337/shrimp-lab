@@ -1,0 +1,11 @@
+/*
+ * SEAM UI — styles/torque/components.css
+ * Catch-all for Torque overrides not covered by named partials.
+ * Currently empty — all components have been extracted to their own partials.
+ */
+
+@layer style {
+
+/* Future Torque-specific overrides go here */
+
+} /* end @layer style */

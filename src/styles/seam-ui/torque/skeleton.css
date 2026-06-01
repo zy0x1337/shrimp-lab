@@ -1,0 +1,13 @@
+/*
+ * SEAM UI — styles/torque/skeleton.css
+ *
+ * Torque skeleton mechanics:
+ *   — Zero radius on all skeleton elements
+ */
+
+@layer style {
+
+[data-style="torque"] .skeleton { border-radius: 0; }
+[data-style="torque"] .skeleton-btn { border-radius: 0; }
+
+} /* end @layer style */

@@ -1,0 +1,68 @@
+/*
+ * SEAM UI — styles/torque/badges.css
+ *
+ * Torque badge mechanics:
+ *   — Rectangular, zero radius
+ *   — Ghost by default: border only, no fill
+ *   — Uppercase, tracked sans
+ *   — Square dot (border-radius 0)
+ */
+
+@layer style {
+
+[data-style="torque"] .badge {
+  border-radius: 0;
+  padding: 0.18em 0.55em;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+[data-style="torque"] .badge-default {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+[data-style="torque"] .badge-primary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid color-mix(in oklch, var(--color-primary) 50%, transparent);
+}
+[data-style="torque"] .badge-success {
+  background: transparent;
+  color: var(--color-success);
+  border: 1px solid color-mix(in oklch, var(--color-success) 45%, transparent);
+}
+[data-style="torque"] .badge-warning {
+  background: transparent;
+  color: var(--color-warning);
+  border: 1px solid color-mix(in oklch, var(--color-warning) 45%, transparent);
+}
+[data-style="torque"] .badge-error,
+[data-style="torque"] .badge-danger {
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid color-mix(in oklch, var(--color-error) 45%, transparent);
+}
+[data-style="torque"] .badge-info {
+  background: transparent;
+  color: var(--color-info);
+  border: 1px solid color-mix(in oklch, var(--color-info) 45%, transparent);
+}
+[data-style="torque"] .badge-dot::before {
+  width: 4px;
+  height: 4px;
+  border-radius: 0;
+}
+
+[data-style="torque"] .tag {
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+} /* end @layer style */

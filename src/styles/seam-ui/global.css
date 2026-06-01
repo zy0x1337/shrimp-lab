@@ -1,0 +1,67 @@
+/*
+ * SEAM UI 2026 — styles/global.css
+ * Shared structural tokens used across all three styles.
+ * These are style-agnostic: spacing, radius, transitions, z-index, content widths.
+ * Color, font, and component-shape tokens live in each style file.
+ */
+
+@layer tokens {
+
+  :root {
+
+    /* ── Spacing (4px base unit) ─────────────────────────────── */
+    --space-1:  0.25rem;   /*  4px */
+    --space-2:  0.5rem;    /*  8px */
+    --space-3:  0.75rem;   /* 12px */
+    --space-4:  1rem;      /* 16px */
+    --space-5:  1.25rem;   /* 20px */
+    --space-6:  1.5rem;    /* 24px */
+    --space-8:  2rem;      /* 32px */
+    --space-10: 2.5rem;    /* 40px */
+    --space-12: 3rem;      /* 48px */
+    --space-16: 4rem;      /* 64px */
+    --space-20: 5rem;      /* 80px */
+    --space-24: 6rem;      /* 96px */
+    --space-32: 8rem;      /* 128px */
+
+    /* ── Fluid Type Scale ────────────────────────────────────── */
+    --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+    --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+    --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+    --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+    --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+    --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+    --text-3xl:  clamp(2.5rem,   1rem    + 4vw,    5rem);
+    --text-hero: clamp(3rem,     0.5rem  + 7vw,    8rem);
+
+    /* ── Content Widths ──────────────────────────────────────── */
+    --content-narrow:  640px;
+    --content-default: 960px;
+    --content-wide:    1200px;
+    --content-full:    100%;
+
+    /* ── Z-Index Scale ───────────────────────────────────────── */
+    --z-base:    0;
+    --z-raised:  10;
+    --z-overlay: 100;
+    --z-modal:   200;
+    --z-toast:   300;
+    --z-tip:     400;
+
+    /* ── Transitions ─────────────────────────────────────────── */
+    --transition-fast:        120ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-slow:        320ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-theme:       350ms ease;
+
+    /* ── Radius — shared defaults (overridden per style) ─────── */
+    --radius-sm:   0.25rem;   /*  4px */
+    --radius-md:   0.5rem;    /*  8px */
+    --radius-lg:   0.75rem;   /* 12px */
+    --radius-xl:   1rem;      /* 16px */
+    --radius-2xl:  1.5rem;    /* 24px */
+    --radius-full: 9999px;
+
+  }
+
+} /* end @layer tokens */

@@ -1,0 +1,148 @@
+/*
+ * SEAM UI 2026 — styles/torque/tokens.css
+ * Style: TORQUE
+ *
+ * Contains: color tokens, font tokens, shadow tokens, radius overrides.
+ * Does NOT contain: component rules.
+ *
+ * Load AFTER styles/global.css, BEFORE css/core.css.
+ */
+
+@layer style.tokens {
+
+/* ── Radius: minimal, functional ───────────────────────────────── */
+[data-style="torque"] {
+  --radius-sm:   0.25rem;   /*  4px */
+  --radius-md:   0.25rem;   /*  4px */
+  --radius-lg:   0.375rem;  /*  6px */
+  --radius-xl:   0.5rem;    /*  8px — max used in Torque */
+  --radius-2xl:  0.5rem;    /*  8px — capped */
+  --radius-full: 9999px;    /* Pills for badges/tags only */
+}
+
+/* ================================================================
+   DARK MODE (primary context for Torque)
+   ================================================================ */
+
+[data-style="torque"],
+[data-style="torque"][data-mode="dark"] {
+  --font-display: "JetBrains Mono", "Courier New", monospace;
+  --font-body:    "IBM Plex Sans", "Helvetica Neue", sans-serif;
+  --font-mono:    "JetBrains Mono", "Courier New", monospace;
+  --weight-display: 700;
+
+  /* Surfaces — near-neutral, cold blue-gray undertone (Hue 240) */
+  --color-bg:               oklch(0.10 0.004 240);
+  --color-surface:          oklch(0.13 0.005 242);
+  --color-surface-2:        oklch(0.15 0.005 240);
+  --color-surface-offset:   oklch(0.18 0.005 238);
+  --color-surface-dynamic:  oklch(0.22 0.004 238);
+  --color-divider:          oklch(0.28 0.004 240);
+  --color-border:           oklch(0.36 0.005 242);
+
+  /* Text — near-pure white, minimal chroma, cold */
+  --color-text:         oklch(0.92 0.006 240);
+  --color-text-muted:   oklch(0.60 0.006 240);
+  --color-text-faint:   oklch(0.38 0.004 240);
+  --color-text-inverse: oklch(0.10 0.004 240);
+
+  /* Primary — Electric Blue (Hue 235, Blueprint energy) */
+  --color-primary:           oklch(0.72 0.19 235);
+  --color-primary-hover:     oklch(0.78 0.20 237);
+  --color-primary-active:    oklch(0.64 0.18 233);
+  --color-primary-highlight: oklch(0.18 0.06 238);
+
+  /* Semantic — dark mode: bright enough for dark surfaces */
+  --color-success: oklch(0.72 0.16 145);
+  --color-warning: oklch(0.75 0.16 72);
+  --color-error:   oklch(0.65 0.20 22);
+  --color-info:    oklch(0.72 0.19 235);
+
+  /* Shadows — tone-matched to cold dark surface */
+  --shadow-sm: 0 1px 4px  oklch(0.04 0.003 240 / 0.60);
+  --shadow-md: 0 4px 16px oklch(0.04 0.003 240 / 0.70);
+  --shadow-lg: 0 16px 48px oklch(0.04 0.003 240 / 0.80);
+  --shadow-xl: 0 32px 80px oklch(0.04 0.003 240 / 0.88);
+
+  --glow-primary: none;
+  --amber: oklch(0.75 0.16 72);
+
+  /* Torque-specific design tokens */
+  --transition-torque: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-torque-sharp: cubic-bezier(0.16, 1, 0.3, 1);
+  --rule-hair:         1px solid oklch(from var(--color-border) l c h / 0.60);
+  --rule-gold:         1px solid oklch(from var(--color-primary) l c h / 0.40);
+  --rule-gold-strong:  2px solid var(--color-primary);
+  --ornament:          "—";
+}
+
+/* ================================================================
+   LIGHT MODE
+   ================================================================ */
+
+[data-style="torque"][data-mode="light"] {
+  /* Surfaces — cool off-white, blueprint paper */
+  --color-bg:               oklch(0.97 0.004 240);
+  --color-surface:          oklch(0.95 0.005 242);
+  --color-surface-2:        oklch(0.93 0.005 240);
+  --color-surface-offset:   oklch(0.90 0.005 238);
+  --color-surface-dynamic:  oklch(0.86 0.004 238);
+  --color-divider:          oklch(0.80 0.004 240);
+  --color-border:           oklch(0.72 0.005 242);
+
+  --color-text:         oklch(0.12 0.008 240);
+  --color-text-muted:   oklch(0.38 0.006 240);
+  --color-text-faint:   oklch(0.58 0.004 240);
+  --color-text-inverse: oklch(0.92 0.006 240);
+
+  /* Primary — deeper blue for light-mode contrast */
+  --color-primary:           oklch(0.40 0.20 235);
+  --color-primary-hover:     oklch(0.32 0.19 233);
+  --color-primary-active:    oklch(0.24 0.17 230);
+  --color-primary-highlight: oklch(0.88 0.06 238);
+
+  /* Semantic — light mode: darker values for contrast on bright surfaces */
+  --color-success: oklch(0.42 0.14 145);
+  --color-warning: oklch(0.48 0.14 72);
+  --color-error:   oklch(0.45 0.18 22);
+  --color-info:    oklch(0.40 0.20 235);
+
+  --shadow-sm: 0 1px 3px  oklch(0.2 0.004 240 / 0.06);
+  --shadow-md: 0 4px 16px oklch(0.2 0.004 240 / 0.08);
+  --shadow-lg: 0 16px 48px oklch(0.2 0.004 240 / 0.12);
+  --shadow-xl: 0 32px 80px oklch(0.2 0.004 240 / 0.16);
+  --glow-primary: none;
+  --amber: oklch(0.52 0.14 72);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-style="torque"]:not([data-mode]) {
+    --color-bg:               oklch(0.10 0.004 240);
+    --color-surface:          oklch(0.13 0.005 242);
+    --color-surface-2:        oklch(0.15 0.005 240);
+    --color-surface-offset:   oklch(0.18 0.005 238);
+    --color-surface-dynamic:  oklch(0.22 0.004 238);
+    --color-divider:          oklch(0.28 0.004 240);
+    --color-border:           oklch(0.36 0.005 242);
+    --color-text:         oklch(0.92 0.006 240);
+    --color-text-muted:   oklch(0.60 0.006 240);
+    --color-text-faint:   oklch(0.38 0.004 240);
+    --color-text-inverse: oklch(0.10 0.004 240);
+    --color-primary:           oklch(0.72 0.19 235);
+    --color-primary-hover:     oklch(0.78 0.20 237);
+    --color-primary-active:    oklch(0.64 0.18 233);
+    --color-primary-highlight: oklch(0.18 0.06 238);
+    --color-success: oklch(0.72 0.16 145);
+    --color-warning: oklch(0.75 0.16 72);
+    --color-error:   oklch(0.65 0.20 22);
+    --color-info:    oklch(0.72 0.19 235);
+    --shadow-sm: 0 1px 4px  oklch(0.04 0.003 240 / 0.60);
+    --shadow-md: 0 4px 16px oklch(0.04 0.003 240 / 0.70);
+    --shadow-lg: 0 16px 48px oklch(0.04 0.003 240 / 0.80);
+    --shadow-xl: 0 32px 80px oklch(0.04 0.003 240 / 0.88);
+    --glow-primary: none;
+    --amber: oklch(0.75 0.16 72);
+  }
+}
+
+} /* end @layer style.tokens */

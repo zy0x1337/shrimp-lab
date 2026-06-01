@@ -1,0 +1,33 @@
+/*
+ * SEAM UI 2026 — styles/torque.css
+ * Style: TORQUE
+ * Character: Editorial Luxury — Criterion Collection, high-end fashion editorial,
+ *            museum catalogs. Controlled, restrained, mechanically precise.
+ * Palette: Cold blue-gray surfaces (dark) · blueprint off-white (light) · Electric Blue accent
+ * Fonts: JetBrains Mono (display) + IBM Plex Sans (body)
+ *
+ * Activation: data-style="torque" on <html>
+ * Dark mode:  data-mode="dark"  |  system preference fallback
+ *
+ * Vendored into shrimp-lab from seam-ui — local copy replaces CDN import.
+ */
+
+@import './torque/tokens.css';
+@import './torque/typography.css';
+@import './torque/navigation.css';
+@import './torque/buttons.css';
+@import './torque/cards.css';
+@import './torque/inputs.css';
+@import './torque/badges.css';
+@import './torque/callouts.css';
+@import './torque/tables.css';
+@import './torque/tabs.css';
+@import './torque/modal.css';
+@import './torque/dividers.css';
+@import './torque/code.css';
+@import './torque/decorators.css';
+@import './torque/skeleton.css';
+@import './torque/stepper.css';
+@import './torque/progress.css';
+@import './torque/tooltip.css';
+@import './torque/components.css';

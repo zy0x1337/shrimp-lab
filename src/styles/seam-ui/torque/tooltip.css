@@ -1,0 +1,46 @@
+/*
+ * SEAM UI — styles/torque/tooltip.css
+ *
+ * Torque tooltip:
+ *   — CSS-only: :hover + :focus-within, no JS required
+ *   — 4 placements: top (default), bottom, left, right
+ *   — border-radius: 0 always
+ *   — opacity fade 120ms linear (no transform)
+ */
+
+@layer style {
+
+[data-style="torque"] .tooltip-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+[data-style="torque"] .tooltip {
+  position: absolute;
+  top: auto; bottom: auto; left: auto; right: auto; transform: none;
+  z-index: 200; max-width: 240px; width: max-content;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-offset); border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md); border-radius: 0;
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500;
+  line-height: 1.4; color: var(--color-text);
+  pointer-events: none; opacity: 0;
+  transition: opacity 120ms linear;
+  white-space: normal; word-break: break-word;
+}
+[data-style="torque"] .tooltip-wrap:hover .tooltip,
+[data-style="torque"] .tooltip-wrap:focus-within .tooltip { opacity: 1; }
+[data-style="torque"] .tooltip,
+[data-style="torque"] .tooltip.is-top { bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
+[data-style="torque"] .tooltip.is-bottom { top: calc(100% + 6px); bottom: auto; left: 50%; right: auto; transform: translateX(-50%); }
+[data-style="torque"] .tooltip.is-left { top: 50%; bottom: auto; right: calc(100% + 6px); left: auto; transform: translateY(-50%); }
+[data-style="torque"] .tooltip.is-right { top: 50%; bottom: auto; left: calc(100% + 6px); right: auto; transform: translateY(-50%); }
+[data-style="torque"] .tooltip-trigger {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 0;
+  border: 1px solid var(--color-border); background: var(--color-surface-2);
+  color: var(--color-text-muted); cursor: default;
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500;
+  transition: color 120ms linear, border-color 120ms linear, background 120ms linear;
+}
+[data-style="torque"] .tooltip-wrap:hover .tooltip-trigger,
+[data-style="torque"] .tooltip-wrap:focus-within .tooltip-trigger { color: var(--color-text); border-color: var(--color-text-faint); }
+[data-style="torque"] .tooltip.is-mono { font-family: var(--font-mono); letter-spacing: 0.03em; }
+
+} /* end @layer style */
