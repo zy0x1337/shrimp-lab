@@ -1,20 +1,36 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, FlaskConical, TestTube, Droplets, Beaker,
-  Baby, BookOpen, Settings, LineChart, TrendingUp, Utensils
+  Baby, BookOpen, Settings, LineChart, TrendingUp,
+  Heart, Shell, Star, Users
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/',            label: 'Dashboard',        icon: LayoutDashboard },
-  { to: '/reference',   label: 'Reference',         icon: FlaskConical },
-  { to: '/parameters',  label: 'Parameter Check',   icon: TestTube },
-  { to: '/calculator',  label: 'TDS Calculator',    icon: Droplets },
-  { to: '/remineralize',label: 'Remineralization',  icon: Beaker },
-  { to: '/breeding',    label: 'Breeding',          icon: Baby },
-  { to: '/logbook',     label: 'Logbook',           icon: BookOpen },
-  { to: '/charts',      label: 'Parameter Charts',  icon: LineChart },
-  { to: '/tds-creep',   label: 'TDS Creep',         icon: TrendingUp },
-  { to: '/settings',    label: 'Settings',          icon: Settings },
+  // Core
+  { to: '/',              label: 'Dashboard',        icon: LayoutDashboard, group: 'core' },
+  { to: '/reference',     label: 'Reference',         icon: FlaskConical,    group: 'core' },
+  // Water
+  { to: '/parameters',    label: 'Parameter Check',   icon: TestTube,        group: 'water' },
+  { to: '/calculator',    label: 'TDS Calculator',    icon: Droplets,        group: 'water' },
+  { to: '/remineralize',  label: 'Remineralization',  icon: Beaker,          group: 'water' },
+  { to: '/charts',        label: 'Parameter Charts',  icon: LineChart,       group: 'water' },
+  { to: '/tds-creep',     label: 'TDS Creep',         icon: TrendingUp,      group: 'water' },
+  // Breeding
+  { to: '/breeding',      label: 'Breeding Timeline', icon: Baby,            group: 'breeding' },
+  { to: '/breeding-pairs',label: 'Breeding Pairs',    icon: Heart,           group: 'breeding' },
+  { to: '/molt',          label: 'Molt Tracker',      icon: Shell,           group: 'breeding' },
+  { to: '/grades',        label: 'Grade Log',         icon: Star,            group: 'breeding' },
+  { to: '/colony',        label: 'Colony Estimator',  icon: Users,           group: 'breeding' },
+  // Log & Settings
+  { to: '/logbook',       label: 'Logbook',           icon: BookOpen,        group: 'log' },
+  { to: '/settings',      label: 'Settings',          icon: Settings,        group: 'log' },
+]
+
+const GROUPS: { key: string; label: string }[] = [
+  { key: 'core',     label: 'Overview' },
+  { key: 'water',    label: 'Water' },
+  { key: 'breeding', label: 'Breeding' },
+  { key: 'log',      label: 'Data' },
 ]
 
 export function Sidebar() {
@@ -29,20 +45,29 @@ export function Sidebar() {
         </svg>
         <span className="sidebar-brand">Shrimp Lab</span>
       </div>
-      <ul role="list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {NAV.map(({ to, label, icon: Icon }) => (
-          <li key={to}>
-            <NavLink
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
-            >
-              <Icon size={16} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
-          </li>
-        ))}
-      </ul>
+
+      {GROUPS.map(group => {
+        const items = NAV.filter(n => n.group === group.key)
+        return (
+          <div key={group.key} className="nav-group">
+            <div className="nav-group-label">{group.label}</div>
+            <ul role="list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {items.map(({ to, label, icon: Icon }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={to === '/'}
+                    className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
+                  >
+                    <Icon size={15} aria-hidden="true" />
+                    <span>{label}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      })}
     </nav>
   )
 }
