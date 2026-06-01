@@ -1,11 +1,30 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
+import { BarChart2, FlaskConical } from 'lucide-react'
 
-// Recommended stocking densities (shrimp per litre)
 const DENSITY: Record<string, { min: number; max: number; label: string }> = {
   low:    { min: 1,   max: 2,   label: 'Low (1–2 / L)' },
   medium: { min: 2,   max: 4,   label: 'Medium (2–4 / L)' },
   high:   { min: 4,   max: 6,   label: 'High (4–6 / L)' },
+}
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
 }
 
 export function ColonyEstimator() {
@@ -29,13 +48,9 @@ export function ColonyEstimator() {
     const maxPop = Math.round(vol * d.max)
     const midPop = Math.round((minPop + maxPop) / 2)
 
-    // From observed berried females: total ≈ berried / berriedPct
-    const fromBerried = obs ? Math.round(obs / bPct) : null
+    const fromBerried    = obs ? Math.round(obs / bPct) : null
+    const fromShrimplets = obs ? Math.round(obs * sf)   : null
 
-    // From observed shrimplets: total ≈ shrimplets × shrimpletFactor
-    const fromShrimplets = obs ? Math.round(obs * sf) : null
-
-    // Recent berried count from logs
     const recentBerried = data.logs
       .filter(l => l.tankId === tankId && l.category === 'berried')
       .reduce((a, l) => a + (l.values?.count ?? 1), 0)
@@ -46,8 +61,17 @@ export function ColonyEstimator() {
   if (data.tanks.length === 0) {
     return (
       <div>
-        <div className="page-header"><h1 className="page-title">Colony Estimator</h1><p className="page-subtitle">Estimate colony size from tank and observation data.</p></div>
-        <div className="card"><p className="text-sm text-muted">No tanks yet. Add one in Settings.</p></div>
+        <div className="page-header">
+          <h1 className="page-title">Colony Estimator</h1>
+          <p className="page-subtitle">Estimate colony size from tank and observation data.</p>
+        </div>
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings to use the colony estimator."
+          />
+        </div>
       </div>
     )
   }
@@ -60,12 +84,12 @@ export function ColonyEstimator() {
       </div>
 
       <div className="card mb-2">
-        <div className="card-header">Tank & Density</div>
+        <div className="card-header">Parameters</div>
         <div className="grid-2">
           <div>
             <label>Tank</label>
             <select className="select" value={tankId} onChange={e => setTankId(e.target.value)}>
-              {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name} ({t.volumeL}L)</option>)}
+              {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name} ({t.volumeL} L)</option>)}
             </select>
           </div>
           <div>
@@ -75,64 +99,67 @@ export function ColonyEstimator() {
             </select>
           </div>
         </div>
-      </div>
-
-      <div className="card mb-2">
-        <div className="card-header">Observation-based Estimates</div>
-        <div className="grid-2">
+        <div className="grid-2" style={{ marginTop: 8 }}>
           <div>
-            <label>Estimated % berried females in colony</label>
-            <input className="input" type="number" min="1" max="100" placeholder="10" value={berriedPct}
+            <label>Berried female % (approx.)</label>
+            <input className="input" type="number" min="1" max="50" value={berriedPct}
               onChange={e => setBerriedPct(e.target.value)} />
-            <div className="text-xs text-muted" style={{ marginTop: 4 }}>Typical range: 5–20 %</div>
           </div>
           <div>
-            <label>Shrimplet multiplier (total / observed)</label>
-            <input className="input" type="number" min="1" step="0.5" placeholder="2.5" value={shrimpletFactor}
+            <label>Shrimplet multiplier</label>
+            <input className="input" type="number" step="0.1" min="1" value={shrimpletFactor}
               onChange={e => setShrimpletFactor(e.target.value)} />
-            <div className="text-xs text-muted" style={{ marginTop: 4 }}>Accounts for hiding shrimplets. Default: 2.5×</div>
           </div>
         </div>
         <div style={{ marginTop: 8, maxWidth: 240 }}>
           <label>Observed count (berried ♀ or shrimplets)</label>
-          <input className="input" type="number" min="0" placeholder="e.g. 5" value={observed}
+          <input className="input" type="number" min="0" placeholder="Optional" value={observed}
             onChange={e => setObserved(e.target.value)} />
         </div>
       </div>
 
-      {/* Results */}
       <div className="card">
-        <div className="card-header">Estimated Colony Size</div>
-        <div className="grid-3 text-sm" style={{ marginBottom: 16 }}>
+        <div className="card-header">Estimates — {tank?.name} ({tank?.volumeL} L)</div>
+        <div className="grid-3">
           <div>
-            <div className="stat-value" style={{ fontSize: '1.8rem' }}>{est.minPop}–{est.maxPop}</div>
-            <div className="stat-label">Density-based range</div>
-            <div className="text-xs text-muted" style={{ marginTop: 2 }}>{tank?.volumeL}L × {DENSITY[density].min}–{DENSITY[density].max} / L</div>
-          </div>
-          {est.fromBerried !== null && (
-            <div>
-              <div className="stat-value" style={{ fontSize: '1.8rem' }}>{est.fromBerried}</div>
-              <div className="stat-label">From berried % estimate</div>
-              <div className="text-xs text-muted" style={{ marginTop: 2 }}>{observed} berried ÷ {berriedPct}%</div>
+            <div className="stat-value" style={{ color: 'var(--color-accent)' }}>
+              {est.minPop}–{est.maxPop}
             </div>
-          )}
-          {est.fromShrimplets !== null && (
+            <div className="stat-label">Capacity range</div>
+          </div>
+          <div>
+            <div className="stat-value">{est.midPop}</div>
+            <div className="stat-label">Mid estimate</div>
+          </div>
+          {est.recentBerried > 0 && (
             <div>
-              <div className="stat-value" style={{ fontSize: '1.8rem' }}>{est.fromShrimplets}</div>
-              <div className="stat-label">From shrimplet estimate</div>
-              <div className="text-xs text-muted" style={{ marginTop: 2 }}>{observed} × {shrimpletFactor}×</div>
+              <div className="stat-value" style={{ color: 'var(--color-warn)' }}>{est.recentBerried}</div>
+              <div className="stat-label">Berried logged</div>
             </div>
           )}
         </div>
 
-        {est.recentBerried > 0 && (
-          <div className="text-sm text-muted" style={{ borderTop: '1px solid var(--color-divider)', paddingTop: 12 }}>
-            📖 Logbook: <strong>{est.recentBerried}</strong> berried female(s) recorded for this tank.
+        {observed && (
+          <div className="grid-2" style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-divider)' }}>
+            {est.fromBerried !== null && (
+              <div>
+                <div className="stat-value">{est.fromBerried}</div>
+                <div className="stat-label">Est. from berried %</div>
+              </div>
+            )}
+            {est.fromShrimplets !== null && (
+              <div>
+                <div className="stat-value">{est.fromShrimplets}</div>
+                <div className="stat-label">Est. from shrimplets ×{shrimpletFactor}</div>
+              </div>
+            )}
           </div>
         )}
 
-        <div className="text-xs text-faint" style={{ marginTop: 12 }}>
-          These are estimates only. Actual colony size depends on hiding spots, plant density, feeding behaviour, and mortality rates.
+        <div className="text-xs text-muted" style={{ marginTop: '1rem' }}>
+          Capacity based on {DENSITY[density].label} for a {tank?.volumeL} L tank.
+          Estimates are approximate — actual population depends on survival rate,
+          feeding, and water quality.
         </div>
       </div>
     </div>

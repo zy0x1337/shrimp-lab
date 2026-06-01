@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
 import type { MoltStatus } from '../lib/types'
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, XCircle, Activity, FlaskConical } from 'lucide-react'
 
 const MOLT_STATUS_LABELS: Record<MoltStatus, { label: string; color: string; icon: React.ReactNode; tip: string }> = {
   normal: {
@@ -27,6 +27,25 @@ const MOLT_STATUS_LABELS: Record<MoltStatus, { label: string; color: string; ico
 function fmtDate(iso: string) {
   const d = new Date(iso)
   return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`
+}
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
 }
 
 export function MoltTracker() {
@@ -66,8 +85,17 @@ export function MoltTracker() {
   if (data.tanks.length === 0) {
     return (
       <div>
-        <div className="page-header"><h1 className="page-title">Molt Tracker</h1><p className="page-subtitle">Log and analyze molting events.</p></div>
-        <div className="card"><p className="text-sm text-muted">No tanks yet. Add one in Settings.</p></div>
+        <div className="page-header">
+          <h1 className="page-title">Molt Tracker</h1>
+          <p className="page-subtitle">Log and analyze molting events.</p>
+        </div>
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings to start tracking molt events."
+          />
+        </div>
       </div>
     )
   }
@@ -145,7 +173,13 @@ export function MoltTracker() {
       {/* Log */}
       <div className="card">
         <div className="card-header">Molt History</div>
-        {moltLogs.length === 0 && <p className="text-sm text-muted">No molt events logged yet.</p>}
+        {moltLogs.length === 0 && (
+          <EmptyState
+            icon={<Activity size={22} />}
+            title="No molt events logged yet"
+            body="Use the form above to log your first molt. Normal, failed, and WROD events are tracked separately."
+          />
+        )}
         {moltLogs.map(log => {
           const s = (log.values?.moltStatus ?? 'normal') as MoltStatus
           const meta = MOLT_STATUS_LABELS[s]

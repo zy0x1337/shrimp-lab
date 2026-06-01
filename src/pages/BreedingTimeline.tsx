@@ -3,6 +3,26 @@ import { estimateHatch } from '../lib/calculators'
 import { formatSpecies } from '../lib/species'
 import { useData } from '../lib/DataContext'
 import type { HatchEstimate } from '../lib/calculators'
+import { Egg, FlaskConical } from 'lucide-react'
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
+}
 
 export function BreedingTimeline() {
   const { data, addBreeding, deleteBreeding } = useData()
@@ -29,6 +49,24 @@ export function BreedingTimeline() {
     const days = Math.floor((Date.now() - new Date(b.berriedDate).getTime()) / 86400000)
     return days >= -1 && days <= 30
   })
+
+  if (data.tanks.length === 0) {
+    return (
+      <div>
+        <div className="page-header">
+          <h1 className="page-title">Breeding Timeline</h1>
+          <p className="page-subtitle">Estimate hatch windows from berried dates and temperature.</p>
+        </div>
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings to start tracking breeding timelines."
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -120,13 +158,12 @@ export function BreedingTimeline() {
               </div>
             </div>
           ) : (
-            <div className="card empty-state">
-              <div className="empty-state-icon">🥚</div>
-              <div className="empty-state-title">Timeline Estimator</div>
-              <div className="empty-state-text">
-                Enter a berried date and tank temperature to estimate when shrimplets will hatch.
-                Typical range is 21–28 days at ~22°C.
-              </div>
+            <div className="card">
+              <EmptyState
+                icon={<Egg size={22} />}
+                title="Timeline Estimator"
+                body="Enter a berried date and tank temperature to estimate when shrimplets will hatch. Typical range is 21–28 days at ~22°C."
+              />
             </div>
           )}
         </div>

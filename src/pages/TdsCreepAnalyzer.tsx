@@ -1,171 +1,214 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, FlaskConical } from 'lucide-react'
 
-interface CreepStat {
-  date: string
-  tds: number
-  daysSince: number | null
-  rise: number | null
-  risePerDay: number | null
+function fmtDate(iso: string) {
+  const d = new Date(iso)
+  return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`
+}
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
 }
 
 export function TdsCreepAnalyzer() {
   const { data } = useData()
   const [tankId, setTankId] = useState(data.tanks[0]?.id ?? '')
+  const [window, setWindow] = useState('30')
 
-  const stats: CreepStat[] = useMemo(() => {
-    const entries = data.logs
+  const tdsLogs = useMemo(() =>
+    data.logs
       .filter(l => l.tankId === tankId && l.category === 'water_test' && l.values?.tds != null)
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+    [data.logs, tankId]
+  )
 
-    return entries.map((entry, i) => {
-      if (i === 0) return { date: entry.date, tds: entry.values!.tds!, daysSince: null, rise: null, risePerDay: null }
-      const prev = entries[i - 1]
-      const days = Math.max(
-        1,
-        Math.round((new Date(entry.date).getTime() - new Date(prev.date).getTime()) / 86400000)
-      )
-      const rise = entry.values!.tds! - prev.values!.tds!
-      return {
-        date: entry.date,
-        tds: entry.values!.tds!,
-        daysSince: days,
-        rise,
-        risePerDay: +(rise / days).toFixed(2),
-      }
-    })
-  }, [data.logs, tankId])
+  const windowDays = parseInt(window) || 30
 
-  const avgRisePerDay = useMemo(() => {
-    const valid = stats.filter(s => s.risePerDay != null && s.risePerDay > 0)
-    if (!valid.length) return null
-    return +(valid.reduce((a, s) => a + s.risePerDay!, 0) / valid.length).toFixed(2)
-  }, [stats])
+  const analysis = useMemo(() => {
+    if (tdsLogs.length < 2) return null
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - windowDays)
+    const recent = tdsLogs.filter(l => new Date(l.date) >= cutoff)
+    if (recent.length < 2) return null
 
-  const lastTds = stats.length ? stats[stats.length - 1].tds : null
-  const tank = data.tanks.find(t => t.id === tankId)
-  const tdsTarget = tank?.species === 'caridina' ? { min: 100, max: 180 } : { min: 150, max: 250 }
+    const first = recent[0].values!.tds!
+    const last  = recent[recent.length - 1].values!.tds!
+    const delta = last - first
+    const days  = Math.max(1, Math.round((new Date(recent[recent.length-1].date).getTime() - new Date(recent[0].date).getTime()) / 86400000))
+    const ratePerDay  = delta / days
+    const ratePerWeek = ratePerDay * 7
 
-  function tdsStatus(tds: number) {
-    if (tds < tdsTarget.min) return 'low'
-    if (tds > tdsTarget.max) return 'high'
-    return 'good'
-  }
+    const allValues = recent.map(l => l.values!.tds!)
+    const avg = allValues.reduce((a, b) => a + b, 0) / allValues.length
+    const min = Math.min(...allValues)
+    const max = Math.max(...allValues)
 
-  function fmtDate(iso: string) {
-    const d = new Date(iso)
-    return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
-  }
+    const severity: 'ok' | 'warn' | 'critical' =
+      Math.abs(ratePerWeek) < 10 ? 'ok' :
+      Math.abs(ratePerWeek) < 25 ? 'warn' : 'critical'
+
+    return { first, last, delta, days, ratePerDay, ratePerWeek, avg, min, max, severity, count: recent.length }
+  }, [tdsLogs, windowDays])
 
   if (data.tanks.length === 0) {
     return (
       <div>
         <div className="page-header">
           <h1 className="page-title">TDS Creep Analyzer</h1>
-          <p className="page-subtitle">Track TDS rise between water changes.</p>
+          <p className="page-subtitle">Detect gradual TDS drift in your tanks over time.</p>
         </div>
-        <div className="card"><p className="text-sm text-muted">No tanks yet. Add one in Settings.</p></div>
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings to start analyzing TDS creep."
+          />
+        </div>
       </div>
     )
+  }
+
+  const severityColor = {
+    ok:       'var(--color-success)',
+    warn:     'var(--color-warning)',
+    critical: 'var(--color-error)',
+  }
+
+  const severityLabel = {
+    ok:       'Stable',
+    warn:     'Moderate creep',
+    critical: 'Significant drift',
   }
 
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">TDS Creep Analyzer</h1>
-        <p className="page-subtitle">Detect evaporation creep vs contamination in your tank.</p>
+        <p className="page-subtitle">Detect gradual TDS drift and evaporation creep over time.</p>
       </div>
 
-      {/* Tank selector */}
       <div className="card mb-2">
-        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>Tank</label>
-        <select className="select" value={tankId} onChange={e => setTankId(e.target.value)}>
-          {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-      </div>
-
-      {/* Summary */}
-      {stats.length >= 2 && (
-        <div className="card mb-2">
-          <div className="card-header">Summary</div>
-          <div className="grid-3 text-sm">
-            <div>
-              <div className="stat-value" style={{ fontSize: '1.4rem', color: lastTds ? (tdsStatus(lastTds) === 'good' ? 'var(--color-success)' : 'var(--color-error)') : 'inherit' }}>
-                {lastTds ?? '—'}
-              </div>
-              <div className="stat-label">Current TDS (ppm)</div>
-            </div>
-            <div>
-              <div className="stat-value" style={{ fontSize: '1.4rem', color: avgRisePerDay && avgRisePerDay > 3 ? 'var(--color-error)' : avgRisePerDay && avgRisePerDay > 1 ? 'var(--color-warning)' : 'var(--color-success)' }}>
-                {avgRisePerDay != null ? `+${avgRisePerDay}` : '—'}
-              </div>
-              <div className="stat-label">Avg. TDS rise / day</div>
-            </div>
-            <div>
-              <div className="stat-value" style={{ fontSize: '1.4rem' }}>{tdsTarget.min}–{tdsTarget.max}</div>
-              <div className="stat-label">Target range (ppm)</div>
-            </div>
+        <div className="card-header">Analysis window</div>
+        <div className="grid-2">
+          <div>
+            <label>Tank</label>
+            <select className="select" value={tankId} onChange={e => setTankId(e.target.value)}>
+              {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
           </div>
-          {avgRisePerDay != null && avgRisePerDay > 3 && (
-            <div className="mt-1 text-sm" style={{ color: 'var(--color-error)' }}>
-              ⚠ High TDS creep detected (&gt;3 ppm/day). Check for evaporation, top-off with RO/DI instead of tap.
-            </div>
-          )}
-          {avgRisePerDay != null && avgRisePerDay > 1 && avgRisePerDay <= 3 && (
-            <div className="mt-1 text-sm" style={{ color: 'var(--color-warning)' }}>
-              Moderate creep (1–3 ppm/day). Monitor closely — increase top-off frequency.
-            </div>
-          )}
+          <div>
+            <label>Days to analyze</label>
+            <select className="select" value={window} onChange={e => setWindow(e.target.value)}>
+              <option value="14">Last 14 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="60">Last 60 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
         </div>
-      )}
-
-      {/* Log table */}
-      <div className="card">
-        <div className="card-header">TDS History</div>
-        {stats.length === 0 && (
-          <p className="text-sm text-muted">No water test logs with TDS values for this tank yet.</p>
-        )}
-        {stats.length > 0 && (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)', textAlign: 'left' }}>
-                  <th style={{ padding: '6px 8px' }}>Date</th>
-                  <th style={{ padding: '6px 8px' }}>TDS</th>
-                  <th style={{ padding: '6px 8px' }}>Days since prev.</th>
-                  <th style={{ padding: '6px 8px' }}>Rise</th>
-                  <th style={{ padding: '6px 8px' }}>Rise / day</th>
-                  <th style={{ padding: '6px 8px' }}>Trend</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.map((s, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--color-divider)' }}>
-                    <td style={{ padding: '6px 8px', fontVariantNumeric: 'tabular-nums' }}>{fmtDate(s.date)}</td>
-                    <td style={{ padding: '6px 8px', fontWeight: 600, color: tdsStatus(s.tds) === 'good' ? 'var(--color-success)' : tdsStatus(s.tds) === 'high' ? 'var(--color-error)' : 'var(--color-warning)' }}>
-                      {s.tds}
-                    </td>
-                    <td style={{ padding: '6px 8px', color: 'var(--color-text-muted)' }}>{s.daysSince ?? '—'}</td>
-                    <td style={{ padding: '6px 8px', color: s.rise != null ? (s.rise > 0 ? 'var(--color-error)' : s.rise < 0 ? 'var(--color-success)' : 'inherit') : 'inherit' }}>
-                      {s.rise != null ? (s.rise > 0 ? `+${s.rise}` : s.rise) : '—'}
-                    </td>
-                    <td style={{ padding: '6px 8px', fontVariantNumeric: 'tabular-nums' }}>
-                      {s.risePerDay != null ? (s.risePerDay > 0 ? `+${s.risePerDay}` : s.risePerDay) : '—'}
-                    </td>
-                    <td style={{ padding: '6px 8px' }}>
-                      {s.rise == null ? <Minus size={14} color="var(--color-text-faint)" /> :
-                        s.rise > 0 ? <TrendingUp size={14} color="var(--color-error)" /> :
-                        s.rise < 0 ? <TrendingDown size={14} color="var(--color-success)" /> :
-                        <Minus size={14} color="var(--color-text-faint)" />}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
+
+      {tdsLogs.length < 2 ? (
+        <div className="card">
+          <EmptyState
+            icon={<TrendingUp size={22} />}
+            title="Not enough TDS data"
+            body="Log at least 2 water tests with TDS values for this tank to see creep analysis."
+          />
+        </div>
+      ) : !analysis ? (
+        <div className="card">
+          <EmptyState
+            icon={<TrendingUp size={22} />}
+            title="No data in this window"
+            body={`No TDS readings found in the last ${windowDays} days. Try a wider analysis window.`}
+          />
+        </div>
+      ) : (
+        <>
+          <div className="card mb-2">
+            <div className="card-header">Analysis — last {windowDays} days ({analysis.count} readings)</div>
+            <div className="grid-4">
+              <div>
+                <div className="stat-value mono" style={{ color: severityColor[analysis.severity] }}>
+                  {analysis.delta > 0 ? '+' : ''}{analysis.delta.toFixed(0)}
+                </div>
+                <div className="stat-label">Total Δ TDS</div>
+              </div>
+              <div>
+                <div className="stat-value mono">
+                  {analysis.ratePerWeek > 0 ? '+' : ''}{analysis.ratePerWeek.toFixed(1)}
+                </div>
+                <div className="stat-label">ppm / week</div>
+              </div>
+              <div>
+                <div className="stat-value mono">{analysis.avg.toFixed(0)}</div>
+                <div className="stat-label">Average TDS</div>
+              </div>
+              <div>
+                <div className="stat-value" style={{ color: severityColor[analysis.severity] }}>
+                  {severityLabel[analysis.severity]}
+                </div>
+                <div className="stat-label">Status</div>
+              </div>
+            </div>
+
+            {analysis.severity !== 'ok' && (
+              <div className="mt-1 text-sm" style={{ color: severityColor[analysis.severity] }}>
+                {analysis.severity === 'warn'
+                  ? '⚠ Mild TDS creep detected. Monitor closely and consider a small water change.'
+                  : '⚠ Significant TDS drift. Perform a water change and check for evaporation or overfeeding.'}
+              </div>
+            )}
+          </div>
+
+          <div className="card">
+            <div className="card-header">TDS Readings</div>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>TDS (ppm)</th>
+                    <th>Δ prev</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tdsLogs.map((log, i) => {
+                    const prev = i > 0 ? tdsLogs[i-1].values!.tds! : null
+                    const diff = prev != null ? log.values!.tds! - prev : null
+                    return (
+                      <tr key={log.id}>
+                        <td>{fmtDate(log.date)}</td>
+                        <td className="mono">{log.values?.tds}</td>
+                        <td className="mono" style={{ color: diff == null ? undefined : diff > 0 ? 'var(--color-error)' : diff < 0 ? 'var(--color-success)' : undefined }}>
+                          {diff == null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(0)}`}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

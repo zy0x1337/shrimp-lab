@@ -2,15 +2,33 @@ import { useState } from 'react'
 import { useData } from '../lib/DataContext'
 import type { BreedingPair, ShrimpGrade, SpeciesType } from '../lib/types'
 import { formatSpecies } from '../lib/species'
-import { Plus, Trash2, Archive, ArchiveRestore } from 'lucide-react'
+import { Plus, Trash2, Archive, ArchiveRestore, GitMerge, Heart } from 'lucide-react'
 
 const GRADES: ShrimpGrade[] = ['S', 'SS', 'SSS', 'SSSS', 'custom']
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
+}
 
 export function BreedingPairs() {
   const { data, addBreedingPair, updateBreedingPair, deleteBreedingPair } = useData()
   const [showRetired, setShowRetired] = useState(false)
 
-  // Form state
   const [name, setName]             = useState('')
   const [tankId, setTankId]         = useState(data.tanks[0]?.id ?? '')
   const [species, setSpecies]       = useState<SpeciesType>('neocaridina')
@@ -32,6 +50,24 @@ export function BreedingPairs() {
   const visible = showRetired ? retired : active
 
   const tankName = (id: string) => data.tanks.find(t => t.id === id)?.name ?? id
+
+  if (data.tanks.length === 0) {
+    return (
+      <div>
+        <div className="page-header">
+          <h1 className="page-title">Breeding Pairs</h1>
+          <p className="page-subtitle">Track male/female pairings, grades, and litter history.</p>
+        </div>
+        <div className="card">
+          <EmptyState
+            icon={<Heart size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings before tracking breeding pairs."
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -124,7 +160,15 @@ export function BreedingPairs() {
 
       {/* Pair cards */}
       {visible.length === 0 && (
-        <div className="card"><p className="text-sm text-muted">{showRetired ? 'No retired pairs.' : 'No active pairs yet.'}</p></div>
+        <div className="card">
+          <EmptyState
+            icon={<GitMerge size={22} />}
+            title={showRetired ? 'No retired pairs' : 'No active pairs yet'}
+            body={showRetired
+              ? 'Retired pairs will appear here once you archive them.'
+              : 'Create your first breeding pair using the form above.'}
+          />
+        </div>
       )}
       {visible.map(pair => (
         <PairCard
@@ -169,13 +213,11 @@ function PairCard({ pair, tankName, onRetire, onRestore, onDelete }: {
       </div>
 
       <div className="grid-2" style={{ marginTop: 12, gap: 8 }}>
-        {/* Male */}
         <div style={{ padding: '0.6rem 0.75rem', background: 'var(--color-surface-offset)', borderRadius: 'var(--radius)' }}>
           <div className="text-xs" style={{ color: 'var(--color-primary)', fontWeight: 600, marginBottom: 4 }}>♂ Male</div>
           <div className="text-sm">{pair.maleName ?? '—'}</div>
           {pair.maleGrade && <span className="badge" style={{ marginTop: 4 }}>{pair.maleGrade}</span>}
         </div>
-        {/* Female */}
         <div style={{ padding: '0.6rem 0.75rem', background: 'var(--color-surface-offset)', borderRadius: 'var(--radius)' }}>
           <div className="text-xs" style={{ color: 'var(--color-error)', fontWeight: 600, marginBottom: 4 }}>♀ Female</div>
           <div className="text-sm">{pair.femaleName ?? '—'}</div>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
 import type { ShrimpGrade } from '../lib/types'
-import { Plus, Star } from 'lucide-react'
+import { Plus, Star, Award, FlaskConical } from 'lucide-react'
 
 const GRADES: ShrimpGrade[] = ['S', 'SS', 'SSS', 'SSSS', 'custom']
 
@@ -25,6 +25,25 @@ const CAR_MORPHS = ['CRS', 'CBS', 'Mosura', 'Shadow Panda', 'Pinto', 'Wine Red',
 function fmtDate(iso: string) {
   const d = new Date(iso)
   return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`
+}
+
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
 }
 
 export function GradeLog() {
@@ -74,8 +93,17 @@ export function GradeLog() {
   if (data.tanks.length === 0) {
     return (
       <div>
-        <div className="page-header"><h1 className="page-title">Grade Log</h1><p className="page-subtitle">Record and track shrimp quality grades.</p></div>
-        <div className="card"><p className="text-sm text-muted">No tanks yet. Add one in Settings.</p></div>
+        <div className="page-header">
+          <h1 className="page-title">Grade Log</h1>
+          <p className="page-subtitle">Record and track shrimp quality grades.</p>
+        </div>
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings before logging grade assessments."
+          />
+        </div>
       </div>
     )
   }
@@ -157,7 +185,13 @@ export function GradeLog() {
       {/* Log */}
       <div className="card">
         <div className="card-header">Grade History</div>
-        {gradeLogs.length === 0 && <p className="text-sm text-muted">No grade assessments logged yet.</p>}
+        {gradeLogs.length === 0 && (
+          <EmptyState
+            icon={<Award size={22} />}
+            title="No grade assessments yet"
+            body="Log your first grade assessment to start building a quality history for this tank."
+          />
+        )}
         {gradeLogs.map(log => {
           const g = log.values?.grade ?? '?'
           const label = g === 'custom' ? (log.values?.gradeCustom ?? 'custom') : g

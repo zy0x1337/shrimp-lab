@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../lib/DataContext'
 import type { LogCategory, LogEntry } from '../lib/types'
-import { Pencil, Trash2, Check, X } from 'lucide-react'
+import { Pencil, Trash2, Check, X, BookOpen, FlaskConical } from 'lucide-react'
 
 const CATEGORIES: { value: LogCategory; label: string; emoji: string }[] = [
   { value: 'water_test',  label: 'Water Test',  emoji: '🧪' },
@@ -19,28 +19,43 @@ function fmtDate(iso: string) {
   return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
 }
 
+// ── Inline EmptyState ─────────────────────────────────────────────────────────
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', padding: '2.5rem 1.5rem', gap: '0.75rem',
+    }}>
+      <div style={{
+        width: 48, height: 48, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-offset)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--color-accent)',
+      }}>{icon}</div>
+      <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text)' }}>{title}</div>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', maxWidth: '32ch', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  )
+}
+
 export function Logbook() {
   const { data, addLog, updateLog, deleteLog } = useData()
   const [filter, setFilter] = useState<LogCategory | 'all'>('all')
   const [tankFilter, setTankFilter] = useState<string>('all')
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  // New entry form
   const [newDate, setNewDate] = useState(new Date().toISOString().slice(0, 10))
   const [newTankId, setNewTankId] = useState(data.tanks[0]?.id ?? '')
   const [newCat, setNewCat] = useState<LogCategory>('water_test')
   const [newNotes, setNewNotes] = useState('')
-  // water test values
   const [newTds, setNewTds] = useState('')
   const [newGh, setNewGh]   = useState('')
   const [newKh, setNewKh]   = useState('')
   const [newPh, setNewPh]   = useState('')
   const [newTemp, setNewTemp] = useState('')
   const [newWaterChangePct, setNewWaterChangePct] = useState('')
-  // feeding
   const [newFoodType, setNewFoodType] = useState('')
   const [newFoodAmount, setNewFoodAmount] = useState('')
-  // count (molts, deaths, shrimplets, berried)
   const [newCount, setNewCount] = useState('')
 
   const handleAdd = () => {
@@ -71,6 +86,8 @@ export function Logbook() {
 
   const tankName = (id: string) => data.tanks.find(t => t.id === id)?.name ?? id
 
+  const noTanks = data.tanks.length === 0
+
   return (
     <div>
       <div className="page-header">
@@ -78,108 +95,125 @@ export function Logbook() {
         <p className="page-subtitle">Record water tests, feedings, molts, and events.</p>
       </div>
 
-      {/* Add entry */}
-      <div className="card mb-2">
-        <div className="card-header">Add Entry</div>
-        <div className="grid-2">
-          <div>
-            <label>Date</label>
-            <input className="input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+      {noTanks ? (
+        <div className="card">
+          <EmptyState
+            icon={<FlaskConical size={22} />}
+            title="No tanks configured"
+            body="Add a tank in Settings before logging events."
+          />
+        </div>
+      ) : (
+        <>
+          {/* Add entry */}
+          <div className="card mb-2">
+            <div className="card-header">Add Entry</div>
+            <div className="grid-2">
+              <div>
+                <label>Date</label>
+                <input className="input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+              </div>
+              <div>
+                <label>Tank</label>
+                <select className="select" value={newTankId} onChange={e => setNewTankId(e.target.value)}>
+                  {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <label>Category</label>
+              <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginTop: 4 }}>
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c.value}
+                    className={`btn btn-sm ${newCat === c.value ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setNewCat(c.value)}
+                  >
+                    {c.emoji} {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {newCat === 'water_test' && (
+              <div className="grid-3" style={{ marginTop: 8 }}>
+                <div><label>TDS (ppm)</label><input className="input" type="number" placeholder="200" value={newTds} onChange={e => setNewTds(e.target.value)} /></div>
+                <div><label>GH (°dGH)</label><input className="input" type="number" placeholder="7" value={newGh} onChange={e => setNewGh(e.target.value)} /></div>
+                <div><label>KH (°dKH)</label><input className="input" type="number" placeholder="3" value={newKh} onChange={e => setNewKh(e.target.value)} /></div>
+                <div><label>pH</label><input className="input" type="number" step="0.1" placeholder="7.2" value={newPh} onChange={e => setNewPh(e.target.value)} /></div>
+                <div><label>Temp (°C)</label><input className="input" type="number" placeholder="22" value={newTemp} onChange={e => setNewTemp(e.target.value)} /></div>
+                <div><label>Water change (%)</label><input className="input" type="number" placeholder="20" value={newWaterChangePct} onChange={e => setNewWaterChangePct(e.target.value)} /></div>
+              </div>
+            )}
+            {newCat === 'feeding' && (
+              <div className="grid-2" style={{ marginTop: 8 }}>
+                <div><label>Food type</label><input className="input" placeholder="e.g. Hikari Shrimp Cuisine" value={newFoodType} onChange={e => setNewFoodType(e.target.value)} /></div>
+                <div><label>Amount (g)</label><input className="input" type="number" step="0.1" placeholder="0.5" value={newFoodAmount} onChange={e => setNewFoodAmount(e.target.value)} /></div>
+              </div>
+            )}
+            {['molt', 'death', 'berried', 'shrimplets'].includes(newCat) && (
+              <div style={{ marginTop: 8, maxWidth: 160 }}>
+                <label>Count</label>
+                <input className="input" type="number" min="1" placeholder="1" value={newCount} onChange={e => setNewCount(e.target.value)} />
+              </div>
+            )}
+
+            <div style={{ marginTop: 8 }}>
+              <label>Notes (optional)</label>
+              <input className="input" placeholder="Any additional notes…" value={newNotes} onChange={e => setNewNotes(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdd()} />
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={handleAdd} style={{ marginTop: 8, width: 'fit-content' }}
+              disabled={!newTankId}>
+              Add Entry
+            </button>
           </div>
-          <div>
-            <label>Tank</label>
-            <select className="select" value={newTankId} onChange={e => setNewTankId(e.target.value)}>
+
+          {/* Filters */}
+          <div className="card mb-2">
+            <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginBottom: 8 }}>
+              <button className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('all')}>All</button>
+              {CATEGORIES.map(c => (
+                <button key={c.value} className={`btn btn-sm ${filter === c.value ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter(c.value)}>
+                  {c.emoji} {c.label}
+                </button>
+              ))}
+            </div>
+            <select className="select" style={{ width: 'fit-content' }} value={tankFilter} onChange={e => setTankFilter(e.target.value)}>
+              <option value="all">All tanks</option>
               {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
-        </div>
-        <div style={{ marginTop: 8 }}>
-          <label>Category</label>
-          <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginTop: 4 }}>
-            {CATEGORIES.map(c => (
-              <button
-                key={c.value}
-                className={`btn btn-sm ${newCat === c.value ? 'btn-primary' : 'btn-ghost'}`}
-                onClick={() => setNewCat(c.value)}
-              >
-                {c.emoji} {c.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Context fields */}
-        {newCat === 'water_test' && (
-          <div className="grid-3" style={{ marginTop: 8 }}>
-            <div><label>TDS (ppm)</label><input className="input" type="number" placeholder="200" value={newTds} onChange={e => setNewTds(e.target.value)} /></div>
-            <div><label>GH (°dGH)</label><input className="input" type="number" placeholder="7" value={newGh} onChange={e => setNewGh(e.target.value)} /></div>
-            <div><label>KH (°dKH)</label><input className="input" type="number" placeholder="3" value={newKh} onChange={e => setNewKh(e.target.value)} /></div>
-            <div><label>pH</label><input className="input" type="number" step="0.1" placeholder="7.2" value={newPh} onChange={e => setNewPh(e.target.value)} /></div>
-            <div><label>Temp (°C)</label><input className="input" type="number" placeholder="22" value={newTemp} onChange={e => setNewTemp(e.target.value)} /></div>
-            <div><label>Water change (%)</label><input className="input" type="number" placeholder="20" value={newWaterChangePct} onChange={e => setNewWaterChangePct(e.target.value)} /></div>
+          {/* Entries */}
+          <div className="card">
+            {filtered.length === 0 ? (
+              <EmptyState
+                icon={<BookOpen size={22} />}
+                title="No entries yet"
+                body="Use the form above to log your first water test, feeding, or event."
+              />
+            ) : (
+              filtered.map(entry => (
+                <LogRow
+                  key={entry.id}
+                  entry={entry}
+                  tankName={tankName(entry.tankId)}
+                  editing={editingId === entry.id}
+                  onEdit={() => setEditingId(entry.id)}
+                  onSave={(patch) => { updateLog(entry.id, patch); setEditingId(null) }}
+                  onCancel={() => setEditingId(null)}
+                  onDelete={() => deleteLog(entry.id)}
+                />
+              ))
+            )}
           </div>
-        )}
-        {newCat === 'feeding' && (
-          <div className="grid-2" style={{ marginTop: 8 }}>
-            <div><label>Food type</label><input className="input" placeholder="e.g. Hikari Shrimp Cuisine" value={newFoodType} onChange={e => setNewFoodType(e.target.value)} /></div>
-            <div><label>Amount (g)</label><input className="input" type="number" step="0.1" placeholder="0.5" value={newFoodAmount} onChange={e => setNewFoodAmount(e.target.value)} /></div>
-          </div>
-        )}
-        {['molt', 'death', 'berried', 'shrimplets'].includes(newCat) && (
-          <div style={{ marginTop: 8, maxWidth: 160 }}>
-            <label>Count</label>
-            <input className="input" type="number" min="1" placeholder="1" value={newCount} onChange={e => setNewCount(e.target.value)} />
-          </div>
-        )}
-
-        <div style={{ marginTop: 8 }}>
-          <label>Notes (optional)</label>
-          <input className="input" placeholder="Any additional notes…" value={newNotes} onChange={e => setNewNotes(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleAdd()} />
-        </div>
-        <button className="btn btn-primary btn-sm" onClick={handleAdd} style={{ marginTop: 8, width: 'fit-content' }}
-          disabled={!newTankId}>
-          Add Entry
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="card mb-2">
-        <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginBottom: 8 }}>
-          <button className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('all')}>All</button>
-          {CATEGORIES.map(c => (
-            <button key={c.value} className={`btn btn-sm ${filter === c.value ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter(c.value)}>
-              {c.emoji} {c.label}
-            </button>
-          ))}
-        </div>
-        <select className="select" style={{ width: 'fit-content' }} value={tankFilter} onChange={e => setTankFilter(e.target.value)}>
-          <option value="all">All tanks</option>
-          {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-      </div>
-
-      {/* Entries */}
-      <div className="card">
-        {filtered.length === 0 && <p className="text-sm text-muted">No entries yet.</p>}
-        {filtered.map(entry => (
-          <LogRow
-            key={entry.id}
-            entry={entry}
-            tankName={tankName(entry.tankId)}
-            editing={editingId === entry.id}
-            onEdit={() => setEditingId(entry.id)}
-            onSave={(patch) => { updateLog(entry.id, patch); setEditingId(null) }}
-            onCancel={() => setEditingId(null)}
-            onDelete={() => deleteLog(entry.id)}
-          />
-        ))}
-      </div>
+        </>
+      )}
     </div>
   )
 }
 
-// ── Log row with inline edit ───────────────────────────────────────────────────
 function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete }: {
   entry: LogEntry
   tankName: string
@@ -210,32 +244,31 @@ function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete }
 
   if (editing) {
     return (
-      <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+      <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', gap: 8, alignItems: 'center' }}>
         <input className="input" style={{ flex: 1 }} value={notes} onChange={e => setNotes(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') onSave({ notes: notes.trim() || undefined }) }} />
-        <button className="btn btn-sm btn-primary" onClick={() => onSave({ notes: notes.trim() || undefined })}><Check size={13} /></button>
-        <button className="btn btn-sm btn-ghost" onClick={onCancel}><X size={13} /></button>
+          onKeyDown={e => { if (e.key === 'Enter') onSave({ notes: notes.trim() || undefined }); if (e.key === 'Escape') onCancel() }} />
+        <button className="btn btn-primary btn-sm" onClick={() => onSave({ notes: notes.trim() || undefined })}><Check size={14} /></button>
+        <button className="btn btn-ghost btn-sm" onClick={onCancel}><X size={14} /></button>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: '1rem', lineHeight: 1.4 }}>{cat?.emoji}</span>
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>
-            {cat?.label}
-            <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', marginLeft: 6 }}>{tankName}</span>
-            <span style={{ fontWeight: 400, color: 'var(--color-text-faint)', marginLeft: 6, fontSize: 'var(--text-xs)' }}>{fmtDate(entry.date)}</span>
-          </div>
-          {summarize(entry) && <div className="text-xs text-muted" style={{ marginTop: 2 }}>{summarize(entry)}</div>}
-          {entry.notes && <div className="text-xs" style={{ marginTop: 2, color: 'var(--color-text-muted)' }}>{entry.notes}</div>}
+    <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-row gap-1" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <span>{cat?.emoji}</span>
+          <span className="text-sm" style={{ fontWeight: 600 }}>{cat?.label}</span>
+          {summarize(entry) && <span className="text-xs text-muted mono">{summarize(entry)}</span>}
+        </div>
+        <div className="text-xs text-muted" style={{ marginTop: 2 }}>
+          {tankName} · {fmtDate(entry.date)}
+          {entry.notes && ` · ${entry.notes}`}
         </div>
       </div>
       <div className="flex-row gap-1">
-        <button className="btn btn-sm btn-ghost" onClick={onEdit}><Pencil size={13} /></button>
-        <button className="btn btn-sm btn-danger" onClick={onDelete}><Trash2 size={13} /></button>
+        <button className="btn btn-ghost btn-sm" onClick={onEdit} title="Edit notes"><Pencil size={13} /></button>
+        <button className="btn btn-danger btn-sm" onClick={onDelete}><Trash2 size={13} /></button>
       </div>
     </div>
   )
