@@ -1,0 +1,17 @@
+/*
+ * SEAM UI — styles/torque/dividers.css
+ */
+
+@layer style {
+
+[data-style="torque"] .divider { border: none; border-top: var(--rule-hair); margin-block: var(--space-6); height: 0; position: relative; }
+[data-style="torque"] .divider::before, [data-style="torque"] .divider::after { display: none; }
+[data-style="torque"] .divider-ruled { border-top: var(--rule-gold-strong); }
+[data-style="torque"] .divider-text { color: var(--color-text-faint); font-family: var(--font-display); font-style: italic; letter-spacing: 0.12em; font-size: var(--text-xs); }
+[data-style="torque"] .divider-text::before, [data-style="torque"] .divider-text::after { border-top: var(--rule-hair); background: none; height: 0; }
+[data-style="torque"] .rule-ornament { display: flex; align-items: center; gap: var(--space-4); margin-block: var(--space-6); color: var(--color-text-faint); font-family: var(--font-display); font-style: italic; font-size: var(--text-xs); letter-spacing: 0.12em; }
+[data-style="torque"] .rule-ornament::before, [data-style="torque"] .rule-ornament::after { content: ''; flex: 1; border-top: var(--rule-hair); }
+[data-style="torque"] .rule, [data-style="torque"] hr { border: none; border-top: var(--rule-hair); margin-block: var(--space-6); }
+[data-style="torque"] .rule-gold { border: none; border-top: var(--rule-gold); margin-block: var(--space-6); }
+
+} /* end @layer style */

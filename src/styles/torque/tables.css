@@ -1,0 +1,17 @@
+/*
+ * SEAM UI — styles/torque/tables.css
+ */
+
+@layer style {
+
+[data-style="torque"] .table-wrap { border-radius: 0; }
+[data-style="torque"] .table th {
+  font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500;
+  font-variant: small-caps; text-transform: lowercase; letter-spacing: 0.08em;
+  background: var(--color-surface-offset); border-radius: 0; border-bottom: var(--rule-gold);
+}
+[data-style="torque"] .table th:first-child,
+[data-style="torque"] .table th:last-child { border-radius: 0; }
+[data-style="torque"] .table tbody tr:hover { background: oklch(from var(--color-surface-offset) l c h / 0.60); }
+
+} /* end @layer style */

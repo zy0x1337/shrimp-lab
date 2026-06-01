@@ -1,0 +1,10 @@
+/*
+ * SEAM UI — styles/torque/skeleton.css
+ */
+
+@layer style {
+
+[data-style="torque"] .skeleton { border-radius: 0; }
+[data-style="torque"] .skeleton-btn { border-radius: 0; }
+
+} /* end @layer style */

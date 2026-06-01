@@ -1,0 +1,41 @@
+/*
+ * SEAM UI — styles/torque/cards.css
+ */
+
+@layer style {
+
+[data-style="torque"] .card {
+  border-radius: 0;
+  border: 1px solid var(--color-border);
+  border-left: var(--rule-gold-strong);
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
+  background: var(--color-surface);
+  filter: none;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-torque), border-color var(--transition-torque);
+}
+[data-style="torque"] .card-interactive:hover { box-shadow: var(--shadow-md); border-color: var(--color-border); transform: none; }
+[data-style="torque"] .card-interactive:active { box-shadow: var(--shadow-sm); }
+[data-style="torque"] .card-featured {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  border-left: var(--rule-gold-strong);
+  box-shadow: var(--shadow-md);
+}
+[data-style="torque"] .card-title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-style: italic;
+}
+[data-style="torque"] .card-bento,
+[data-style="torque"] .card-quote,
+[data-style="torque"] .stat-card {
+  border-radius: 0;
+  border-left: var(--rule-gold-strong);
+  box-shadow: var(--shadow-sm);
+  filter: none;
+}
+[data-style="torque"] .card-quote { padding: var(--space-8) var(--space-6) var(--space-8) var(--space-10); }
+[data-style="torque"] .stat-value { font-family: var(--font-display); font-style: italic; }
+
+} /* end @layer style */
