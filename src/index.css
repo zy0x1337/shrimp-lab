@@ -1,9 +1,35 @@
 /* ── Shrimp Lab — global styles ──────────────────────────────────────────────
-   Built on SEAM UI Torque. Extends base tokens with app-specific utilities.
+   Built on SEAM UI Torque (vendored locally — raw.githubusercontent.com
+   does not serve CSS with the correct Content-Type header).
    ─────────────────────────────────────────────────────────────────────────── */
 
-@import url('https://raw.githubusercontent.com/zy0x1337/seam-ui/main/styles/global.css');
-@import url('https://raw.githubusercontent.com/zy0x1337/seam-ui/main/styles/torque.css');
+@import './styles/seam-ui/global.css';
+@import './styles/seam-ui/torque-tokens.css';
+
+/* Google Fonts — JetBrains Mono + IBM Plex Sans */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
+/* ── Base reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body, "IBM Plex Sans", sans-serif);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+}
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; color: inherit; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; line-height: 1.15; }
 
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 .app-layout {
@@ -69,7 +95,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.6rem;
-  border-radius: var(--radius, 6px);
+  border-radius: var(--radius, 4px);
   color: var(--color-text-muted);
   text-decoration: none;
   font-size: 0.82rem;
@@ -111,7 +137,7 @@
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius, 8px);
+  border-radius: var(--radius, 4px);
   padding: 1rem 1.1rem;
 }
 
@@ -131,7 +157,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.85rem;
-  border-radius: var(--radius, 6px);
+  border-radius: var(--radius, 4px);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -148,9 +174,9 @@
 
 .btn-primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-text-inverse);
 }
-.btn-primary:hover { background: var(--color-primary-hover, #0040cc); }
+.btn-primary:hover { background: var(--color-primary-hover); }
 
 .btn-ghost {
   background: transparent;
@@ -167,7 +193,7 @@
   color: var(--color-error);
   border-color: var(--color-error);
 }
-.btn-danger:hover { background: var(--color-error); color: #fff; }
+.btn-danger:hover { background: var(--color-error); color: var(--color-text-inverse); }
 
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -177,7 +203,7 @@
   width: 100%;
   padding: 0.45rem 0.65rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius, 6px);
+  border-radius: var(--radius, 4px);
   background: var(--color-surface-offset);
   color: var(--color-text);
   font-size: 0.85rem;
@@ -203,7 +229,7 @@ label {
   display: inline-flex;
   align-items: center;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full, 9999px);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -212,8 +238,8 @@ label {
   border: 1px solid var(--color-border);
 }
 
-.badge-neo      { background: rgba(255,100,60,0.12);  color: var(--color-error);   border-color: transparent; }
-.badge-caridina { background: rgba(26,94,255,0.12);   color: var(--color-primary); border-color: transparent; }
+.badge-neo      { background: oklch(0.65 0.20 22 / 0.15);  color: var(--color-error);   border-color: transparent; }
+.badge-caridina { background: oklch(0.72 0.19 235 / 0.15); color: var(--color-primary); border-color: transparent; }
 
 /* ── Grids ───────────────────────────────────────────────────────────────── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
