@@ -1,21 +1,36 @@
 # 🦐 Shrimp Lab
 
-**A local-first toolkit for freshwater shrimp keepers and breeders.**
+**The open-source, offline-first PWA for freshwater shrimp keepers and breeders.**
 
-Shrimp Lab is an open-source, client-side web app built for Neocaridina and Caridina shrimp hobbyists. It includes water parameter references, calculators, breeding estimators, remineralization planning, and simple local logs — with **no account, no API, and no cloud lock-in**.
+Shrimp Lab is a free, open-source Progressive Web App built for Neocaridina and Caridina hobbyists. It runs entirely in your browser — no account, no API keys, no cloud lock-in. Install it on any device and use it fully offline.
+
+> 🚧 **Actively developed.** See [ROADMAP.md](ROADMAP.md) for what's coming.
+
+---
 
 ## Features
 
-- 📋 **Species Reference** — Target water parameters for Neocaridina and Caridina with stability notes
-- 🧪 **Parameter Checker** — Compare your tank values against species target ranges with color-coded feedback
-- 💧 **TDS Water Change Calculator** — Calculate optimal water change percentage to hit target TDS
-- ⚗️ **Remineralization Planner** — Calculate exact remineralizer dosage for RO/DI water with product presets
-- 🥚 **Breeding Timeline** — Estimate hatch windows from berried dates and tank temperature, track active berried females
-- 📖 **Logbook** — Record water tests, molts, deaths, berried females, shrimplet sightings with filters, edit existing entries
-- 🐟 **Tank Profiles** — Manage multiple tanks (Neo, Caridina, cull, grow-out) with inline editing
-- 📦 **Import / Export** — JSON backup/restore for your entire dataset + CSV export for log entries
-- 🌙 **Dark + Light Mode** — Aquatic-themed color palette for both
-- 📊 **Dashboard** — At-a-glance view with stats, active breeding alerts, tank parameter snapshots, and recent activity
+### 🧪 Water Chemistry
+- **Parameter Checker** — Compare tank values against species target ranges with color-coded feedback
+- **TDS Water Change Calculator** — Calculate optimal water change percentage to hit target TDS
+- **Remineralization Planner** — Calculate remineralizer dosage for RO/DI water with product presets
+- **Species Reference** — Target water parameters for Neocaridina and Caridina with stability notes
+
+### 🥚 Breeding
+- **Breeding Timeline** — Estimate hatch windows from berried dates and tank temperature
+- **Active Breeding Tracker** — Track all berried females with progress and alerts
+
+### 📖 Logging & Tracking
+- **Logbook** — Record water tests, molts, deaths, berried females, shrimplet sightings
+- **Dashboard** — At-a-glance stats, breeding alerts, parameter snapshots, recent activity
+- **Tank Profiles** — Manage multiple tanks (Neo, Caridina, cull, grow-out) with inline editing
+
+### 💾 Data & Settings
+- **Import / Export** — JSON backup/restore + CSV export for log entries
+- **Dark + Light Mode** — Torque design system (SEAM UI)
+- **Offline-first** — All data stays in your browser via localStorage
+
+---
 
 ## Quick Start
 
@@ -26,92 +41,107 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
-## Build for Production
+### Build for Production
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Deploy the `dist/` folder to GitHub Pages, Vercel, or any static host.
+Deploy the `dist/` folder to Vercel, GitHub Pages, or any static host.
+
+---
 
 ## Tech Stack
 
-- **React 19** with TypeScript
-- **Vite** for builds and dev server
-- **React Router** for client-side navigation
-- **Lucide React** for icons
-- **localStorage** for data persistence
-- **No backend, no API keys, no cloud dependency**
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Build | Vite |
+| Routing | React Router |
+| Styling | SEAM UI — Torque Style |
+| Icons | Lucide React |
+| Storage | localStorage (offline-first) |
+| PWA | Vite PWA Plugin *(planned)* |
+| Backend | None — fully client-side |
+
+---
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   └── layout/
-│       └── Sidebar.tsx              # Navigation sidebar
-├── lib/
-│   ├── types.ts                     # TypeScript types
-│   ├── species.ts                   # Species reference data + helpers
-│   ├── calculators.ts               # Calculation utilities (TDS, hatching, parameters, remineralization, CSV)
-│   ├── db.ts                        # localStorage persistence layer
-│   └── DataContext.tsx              # React context for app state
-├── pages/
-│   ├── Dashboard.tsx                # Home page with stats, breeding alerts, parameter snapshots, recent activity
-│   ├── Reference.tsx                # Species parameter reference cards
-│   ├── ParameterChecker.tsx         # Tank value vs target range checker
-│   ├── TdsCalculator.tsx            # Water change calculator
-│   ├── RemineralizationPlanner.tsx  # RO/DI remineralizer dosage calculator
-│   ├── BreedingTimeline.tsx         # Berried → hatch timeline estimator with tracking
-│   ├── Logbook.tsx                  # Full logbook with category filters and edit support
-│   └── Settings.tsx                 # Tank profiles, theme, units, import/export
-├── App.tsx                          # Router and layout
-├── main.tsx                         # Entry point
-└── index.css                        # Global styles and design tokens
+shrimp-lab/
+├── public/
+├── src/
+│   ├── components/
+│   │   └── layout/
+│   │       └── Sidebar.tsx
+│   ├── lib/
+│   │   ├── types.ts              # TypeScript types
+│   │   ├── species.ts            # Species reference data
+│   │   ├── calculators.ts        # TDS, hatching, remineralization, CSV
+│   │   ├── db.ts                 # localStorage persistence layer
+│   │   └── DataContext.tsx       # App-wide React context
+│   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── Reference.tsx
+│   │   ├── ParameterChecker.tsx
+│   │   ├── TdsCalculator.tsx
+│   │   ├── RemineralizationPlanner.tsx
+│   │   ├── BreedingTimeline.tsx
+│   │   ├── Logbook.tsx
+│   │   └── Settings.tsx
+│   ├── styles/
+│   │   └── seam-ui/              # SEAM UI Torque style (local copy)
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── index.html
+└── ROADMAP.md
 ```
 
-## Default Parameter Targets
+---
 
-### Neocaridina (Cherry, Blue Dream, Yellow, etc.)
+## Water Parameter Reference
+
+### Neocaridina
 | Parameter | Range |
-|-----------|-------|
+|---|---|
 | TDS | 150–250 ppm |
 | GH | 6–8 °dGH |
 | KH | 2–5 °dKH |
 | pH | 6.5–7.8 |
-| Temp | 20–24°C (68–75°F) |
+| Temperature | 20–24 °C |
 
-### Caridina (Crystal Red, Bee, Taiwan Bee, etc.)
+### Caridina
 | Parameter | Range |
-|-----------|-------|
+|---|---|
 | TDS | 100–180 ppm |
 | GH | 4–6 °dGH |
 | KH | 0–1 °dKH |
 | pH | 5.8–6.8 |
-| Temp | 20–24°C (68–75°F) |
+| Temperature | 20–24 °C |
 
-> ⚠️ These are guidelines. **Stability is more important than hitting exact numbers.** Sudden parameter swings kill shrimp faster than slightly suboptimal but stable water.
+> **Stability beats perfection.** Sudden swings kill shrimp faster than slightly off-target but stable parameters.
 
-## Design Philosophy
+---
 
-- **Calm, clean, aquatic-inspired UI** — no flashy dashboards, no gamification
-- **Works offline** — all data stays in your browser
-- **Fast and lightweight** — minimal dependencies
-- **Open source** — MIT licensed, PRs welcome
+## Design
 
-## Future Ideas
+Shrimp Lab uses the **Torque** style from [SEAM UI](https://github.com/zy0x1337/seam-ui) — a cold, editorial design system with Electric Blue accents, JetBrains Mono display, and IBM Plex Sans body type. Restrained, precise, and readable in dark rooms.
 
-- Printable parameter cards
-- Colony population estimator
-- Breeding line tracker with genetics
-- PWA / offline install support
-- Dashboard charts for parameter trends over time
-- Photo attachments for log entries
-- Multi-language support
-- Water test reminders / schedule
-- Feeding log category
-- TDS creep analyzer (track TDS rise between water changes)
+---
+
+## Contributing
+
+PRs and issues are welcome. See [ROADMAP.md](ROADMAP.md) for planned features — pick one and open an issue to claim it.
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit with a clear message
+4. Open a PR against `main`
+
+---
 
 ## License
 
@@ -119,4 +149,4 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-Built with 🦐 by shrimp keepers, for shrimp keepers.
+*Built with 🦐 by shrimp keepers, for shrimp keepers.*
