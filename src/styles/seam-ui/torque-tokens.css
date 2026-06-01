@@ -1,11 +1,9 @@
 /*
- * SEAM UI 2026 — styles/torque/tokens.css  (vendored into shrimp-lab)
- * Style: TORQUE — color, font, shadow, radius overrides.
+ * SEAM UI 2026 — Torque tokens  (vendored into shrimp-lab)
+ * Scoped to [data-style="torque"] — no @layer needed.
  */
 
-@layer style.tokens {
-
-/* ── Radius: minimal, functional ───────────────────────────────── */
+/* ── Radius overrides: minimal, functional ───────────────────────────── */
 [data-style="torque"] {
   --radius-sm:   0.25rem;
   --radius-md:   0.25rem;
@@ -13,11 +11,11 @@
   --radius-xl:   0.5rem;
   --radius-2xl:  0.5rem;
   --radius-full: 9999px;
-  --radius:      var(--radius-md);
+  --radius:      0.25rem;
 }
 
 /* ================================================================
-   DARK MODE (primary context for Torque)
+   DARK MODE (default Torque context)
    ================================================================ */
 
 [data-style="torque"],
@@ -94,6 +92,7 @@
   --amber: oklch(0.52 0.14 72);
 }
 
+/* System preference fallback (no data-mode set) */
 @media (prefers-color-scheme: dark) {
   [data-style="torque"]:not([data-mode]) {
     --color-bg:               oklch(0.10 0.004 240);
@@ -123,5 +122,3 @@
     --amber: oklch(0.75 0.16 72);
   }
 }
-
-} /* end @layer style.tokens */
