@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, FlaskConical, TestTube, Droplets, Beaker,
@@ -43,7 +42,6 @@ export function Sidebar({ isOpen = true, onClose, triggerRef }: SidebarProps) {
   const { mode, toggleMode } = useTheme()
   const { updateSettings } = useData()
 
-  // Only trap focus when used as a mobile overlay (onClose is defined)
   const isMobileOverlay = onClose !== undefined
   const trapRef = useFocusTrap({
     active: isMobileOverlay && (isOpen ?? false),
@@ -65,7 +63,6 @@ export function Sidebar({ isOpen = true, onClose, triggerRef }: SidebarProps) {
       aria-label="Main navigation"
       aria-modal={isMobileOverlay && isOpen ? 'true' : undefined}
     >
-      {/* Brand */}
       <div className="sidebar-logo">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Shrimp Lab logo">
           <circle cx="14" cy="14" r="13" stroke="var(--color-primary)" strokeWidth="1.5" />
@@ -99,7 +96,6 @@ export function Sidebar({ isOpen = true, onClose, triggerRef }: SidebarProps) {
         </button>
       </div>
 
-      {/* Nav groups */}
       {GROUPS.map(group => {
         const items = NAV.filter(n => n.group === group.key)
         return (

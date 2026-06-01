@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
-import { BarChart2, FlaskConical } from 'lucide-react'
+import { FlaskConical } from 'lucide-react'
 
 const DENSITY: Record<string, { min: number; max: number; label: string }> = {
   low:    { min: 1,   max: 2,   label: 'Low (1–2 / L)' },
@@ -8,7 +8,6 @@ const DENSITY: Record<string, { min: number; max: number; label: string }> = {
   high:   { min: 4,   max: 6,   label: 'High (4–6 / L)' },
 }
 
-// ── Inline EmptyState ─────────────────────────────────────────────────────────
 function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div style={{
