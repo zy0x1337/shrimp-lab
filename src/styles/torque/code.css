@@ -1,0 +1,10 @@
+/*
+ * SEAM UI — styles/torque/code.css
+ */
+
+@layer style {
+
+[data-style="torque"] .code-block { border-radius: 0; border: 1px solid var(--color-border); border-left: var(--rule-gold-strong); }
+[data-style="torque"] .code-block-header { background: var(--color-surface-offset); border-radius: 0; border-bottom: var(--rule-hair); }
+
+} /* end @layer style */

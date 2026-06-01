@@ -1,0 +1,40 @@
+/*
+ * SEAM UI — styles/torque/stepper.css
+ */
+
+@layer style {
+
+[data-style="torque"] .stepper { display: flex; align-items: flex-start; gap: 0; }
+[data-style="torque"] .stepper.is-vertical { flex-direction: column; }
+[data-style="torque"] .stepper-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+[data-style="torque"] .stepper-step:last-child { flex: 0 0 auto; }
+[data-style="torque"] .stepper.is-vertical .stepper-step { flex-direction: row; flex: none; width: 100%; align-items: flex-start; gap: var(--space-4); }
+[data-style="torque"] .stepper-track { display: flex; align-items: center; width: 100%; position: relative; }
+[data-style="torque"] .stepper-step:last-child .stepper-track { width: auto; }
+[data-style="torque"] .stepper.is-vertical .stepper-track { flex-direction: column; width: auto; align-items: center; flex-shrink: 0; }
+[data-style="torque"] .stepper-indicator { width: 28px; height: 28px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 0; border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-text-faint); position: relative; z-index: 1; transition: background 120ms linear, border-color 120ms linear, color 120ms linear; }
+[data-style="torque"] .stepper-numeral { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-text-faint); line-height: 1; transition: color 120ms linear; }
+[data-style="torque"] .stepper-check { display: none; width: 13px; height: 13px; flex-shrink: 0; color: var(--color-primary); }
+[data-style="torque"] .stepper-step.is-active .stepper-indicator { background: var(--color-primary); border-color: var(--color-primary); }
+[data-style="torque"] .stepper-step.is-active .stepper-numeral { color: var(--color-bg); }
+[data-style="torque"] .stepper-step.is-active .stepper-label { color: var(--color-primary); }
+[data-style="torque"] .stepper-step.is-complete .stepper-indicator { background: var(--color-surface-2); border-color: var(--color-primary); }
+[data-style="torque"] .stepper-step.is-complete .stepper-numeral { display: none; }
+[data-style="torque"] .stepper-step.is-complete .stepper-check { display: block; }
+[data-style="torque"] .stepper-step.is-complete .stepper-label { color: var(--color-text-muted); }
+[data-style="torque"] .stepper-step.is-complete .stepper-connector { background: var(--color-primary); }
+[data-style="torque"] .stepper-step.is-error .stepper-indicator { background: oklch(from var(--color-error) l c h / 0.12); border-color: var(--color-error); }
+[data-style="torque"] .stepper-step.is-error .stepper-numeral { color: var(--color-error); }
+[data-style="torque"] .stepper-step.is-error .stepper-label { color: var(--color-error); }
+[data-style="torque"] .stepper-connector { flex: 1; height: 1px; background: var(--color-border); min-width: 8px; transition: background 120ms linear; }
+[data-style="torque"] .stepper.is-vertical .stepper-connector { flex: none; width: 1px; height: 2rem; min-width: unset; }
+[data-style="torque"] .stepper.is-vertical .stepper-step.is-complete .stepper-connector { background: var(--color-primary); }
+[data-style="torque"] .stepper.is-vertical .stepper-step:last-child .stepper-connector { display: none; }
+[data-style="torque"] .stepper-label { margin-top: var(--space-2); font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.10em; color: var(--color-text-faint); text-align: center; white-space: nowrap; transition: color 120ms linear; }
+[data-style="torque"] .stepper.is-vertical .stepper-label { margin-top: 0; padding-top: var(--space-1); text-align: left; }
+[data-style="torque"] .stepper.is-sm .stepper-indicator { width: 22px; height: 22px; }
+[data-style="torque"] .stepper.is-sm .stepper-numeral { font-size: 0.65rem; }
+[data-style="torque"] .stepper.is-sm .stepper-check { width: 10px; height: 10px; }
+[data-style="torque"] .stepper.is-sm .stepper-label { font-size: 0.65rem; }
+
+} /* end @layer style */
