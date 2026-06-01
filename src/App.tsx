@@ -1,21 +1,20 @@
 /**
  * App.tsx — Shrimp Lab shell
  *
- * What this file owns:
- *   1. ThemeProvider   — sets data-style="torque" + data-mode on <html>
- *   2. DataProvider    — IndexedDB-backed app state
- *   3. BrowserRouter   — React Router v7
- *   4. Layout          — Sidebar + main content + mobile overlay
- *   5. AnimatePresence — Framer Motion page transitions (120ms fade + 6px slide)
- *   6. React.Suspense  — lazy page chunks with PageSkeleton fallback
- *   7. ErrorBoundary   — catches page-level render errors
- *   8. ScrollRestoration — resets scroll position on route change
+ * Fixes applied (whitescreen):
+ *  1. Removed `display: contents` from motion.div — Framer Motion cannot
+ *     apply transforms on a contents-box; replaced with a full-width block wrapper.
+ *  2. Removed <ScrollRestoration> — only works with RouterProvider (RR v7
+ *     data API), not BrowserRouter. Replaced with a useEffect-based scroll
+ *     reset inside AnimatedOutlet.
+ *  3. Kept lazy() + named-export pattern — this was already correct.
  */
 import {
   lazy,
   Suspense,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from 'react'
 import {
@@ -24,7 +23,6 @@ import {
   Route,
   Outlet,
   useLocation,
-  ScrollRestoration,
 } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { DataProvider, useData } from './lib/DataContext'
@@ -35,30 +33,27 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { PageSkeleton } from './components/ui/PageSkeleton'
 
 // ─── Lazy page imports ────────────────────────────────────────────────────────
-// Each page is code-split; React.Suspense shows PageSkeleton until ready.
-const Dashboard              = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })))
-const Reference              = lazy(() => import('./pages/Reference').then(m => ({ default: m.Reference })))
-const ParameterChecker       = lazy(() => import('./pages/ParameterChecker').then(m => ({ default: m.ParameterChecker })))
-const TdsCalculator          = lazy(() => import('./pages/TdsCalculator').then(m => ({ default: m.TdsCalculator })))
+const Dashboard               = lazy(() => import('./pages/Dashboard').then(m               => ({ default: m.Dashboard })))
+const Reference               = lazy(() => import('./pages/Reference').then(m               => ({ default: m.Reference })))
+const ParameterChecker        = lazy(() => import('./pages/ParameterChecker').then(m        => ({ default: m.ParameterChecker })))
+const TdsCalculator           = lazy(() => import('./pages/TdsCalculator').then(m           => ({ default: m.TdsCalculator })))
 const RemineralizationPlanner = lazy(() => import('./pages/RemineralizationPlanner').then(m => ({ default: m.RemineralizationPlanner })))
-const BreedingTimeline       = lazy(() => import('./pages/BreedingTimeline').then(m => ({ default: m.BreedingTimeline })))
-const BreedingPairs          = lazy(() => import('./pages/BreedingPairs').then(m => ({ default: m.BreedingPairs })))
-const Logbook                = lazy(() => import('./pages/Logbook').then(m => ({ default: m.Logbook })))
-const ParameterCharts        = lazy(() => import('./pages/ParameterCharts').then(m => ({ default: m.ParameterCharts })))
-const TdsCreepAnalyzer       = lazy(() => import('./pages/TdsCreepAnalyzer').then(m => ({ default: m.TdsCreepAnalyzer })))
-const MoltTracker            = lazy(() => import('./pages/MoltTracker').then(m => ({ default: m.MoltTracker })))
-const GradeLog               = lazy(() => import('./pages/GradeLog').then(m => ({ default: m.GradeLog })))
-const ColonyEstimator        = lazy(() => import('./pages/ColonyEstimator').then(m => ({ default: m.ColonyEstimator })))
-const SettingsPage           = lazy(() => import('./pages/Settings').then(m => ({ default: m.SettingsPage })))
+const BreedingTimeline        = lazy(() => import('./pages/BreedingTimeline').then(m        => ({ default: m.BreedingTimeline })))
+const BreedingPairs           = lazy(() => import('./pages/BreedingPairs').then(m           => ({ default: m.BreedingPairs })))
+const Logbook                 = lazy(() => import('./pages/Logbook').then(m                 => ({ default: m.Logbook })))
+const ParameterCharts         = lazy(() => import('./pages/ParameterCharts').then(m         => ({ default: m.ParameterCharts })))
+const TdsCreepAnalyzer        = lazy(() => import('./pages/TdsCreepAnalyzer').then(m        => ({ default: m.TdsCreepAnalyzer })))
+const MoltTracker             = lazy(() => import('./pages/MoltTracker').then(m             => ({ default: m.MoltTracker })))
+const GradeLog                = lazy(() => import('./pages/GradeLog').then(m                => ({ default: m.GradeLog })))
+const ColonyEstimator         = lazy(() => import('./pages/ColonyEstimator').then(m         => ({ default: m.ColonyEstimator })))
+const SettingsPage            = lazy(() => import('./pages/Settings').then(m                => ({ default: m.SettingsPage })))
 
-// ─── Page transition variants ─────────────────────────────────────────────────
-// Subtle: 120ms opacity fade + 6px upward slide.
-// Respects prefers-reduced-motion via `reducedMotion` prop on MotionConfig
-// (set in AppShell below).
+// ─── Page transition config ────────────────────────────────────────────────────
+// 120ms opacity fade + subtle 6px upward slide on enter, -4px on exit.
 const pageVariants = {
-  initial:  { opacity: 0, y: 6 },
-  animate:  { opacity: 1, y: 0 },
-  exit:     { opacity: 0, y: -4 },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit:    { opacity: 0, y: -4 },
 }
 
 const pageTransition = {
@@ -66,13 +61,26 @@ const pageTransition = {
   ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
 }
 
-// ─── AnimatedOutlet ────────────────────────────────────────────────────────────
-// Wraps <Outlet> with AnimatePresence so entering/leaving pages animate.
+// ─── AnimatedOutlet ───────────────────────────────────────────────────────────
 function AnimatedOutlet() {
   const location = useLocation()
 
+  // Scroll reset — BrowserRouter-compatible replacement for <ScrollRestoration>.
+  // Runs after every pathname change, after the new page has painted.
+  useEffect(() => {
+    const el = document.getElementById('main-content')
+    if (el) el.scrollTop = 0
+    // Also reset window scroll for pages that overflow the viewport
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location.pathname])
+
   return (
     <AnimatePresence mode="wait" initial={false}>
+      {/*
+        FIX: do NOT use display:contents here.
+        Framer Motion needs a real box to apply opacity/transform on.
+        width:100% + minHeight:0 keeps layout neutral.
+      */}
       <motion.div
         key={location.pathname}
         variants={pageVariants}
@@ -80,7 +88,7 @@ function AnimatedOutlet() {
         animate="animate"
         exit="exit"
         transition={pageTransition}
-        style={{ display: 'contents' }}
+        style={{ width: '100%', minHeight: 0 }}
       >
         <Suspense fallback={<PageSkeleton />}>
           <ErrorBoundary>
@@ -93,8 +101,6 @@ function AnimatedOutlet() {
 }
 
 // ─── Layout ────────────────────────────────────────────────────────────────────
-// Desktop: sidebar always visible.
-// Mobile (≤768px): sidebar is a slide-over panel; MobileHeader has the toggle.
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const openSidebar  = useCallback(() => setSidebarOpen(true), [])
@@ -102,21 +108,12 @@ function Layout() {
 
   return (
     <div className="app-layout">
-      {/* Skip-to-content for keyboard users */}
-      <a href="#main-content" className="skip-link">
-        Skip to content
-      </a>
+      <a href="#main-content" className="skip-link">Skip to content</a>
 
-      {/* Mobile header — hidden on desktop via CSS */}
       <MobileHeader isOpen={sidebarOpen} onToggle={openSidebar} />
 
-      {/* Mobile overlay — tap to close sidebar */}
       {sidebarOpen && (
-        <div
-          className="sidebar-overlay"
-          aria-hidden="true"
-          onClick={closeSidebar}
-        />
+        <div className="sidebar-overlay" aria-hidden="true" onClick={closeSidebar} />
       )}
 
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
@@ -124,16 +121,14 @@ function Layout() {
       <main id="main-content" className="main-content">
         <AnimatedOutlet />
       </main>
-
-      {/* Resets window scroll to top on every navigation */}
-      <ScrollRestoration />
     </div>
   )
 }
 
 // ─── AppShell ─────────────────────────────────────────────────────────────────
-// Reads stored theme from DataContext and hands it to ThemeProvider so that
-// ThemeProvider can set the correct data-mode on first paint.
+// Bridges DataProvider → ThemeProvider: reads stored theme from IndexedDB
+// state and passes it as initial value so ThemeProvider sets the correct
+// data-mode on first paint without flicker.
 function AppShell({ children }: { children: ReactNode }) {
   const { data } = useData()
   return (
@@ -143,7 +138,7 @@ function AppShell({ children }: { children: ReactNode }) {
   )
 }
 
-// ─── App (root) ────────────────────────────────────────────────────────────────
+// ─── App (root export) ─────────────────────────────────────────────────────────
 export default function App() {
   return (
     <BrowserRouter>
@@ -151,20 +146,20 @@ export default function App() {
         <AppShell>
           <Routes>
             <Route element={<Layout />}>
-              <Route index                  element={<Dashboard />} />
-              <Route path="reference"       element={<Reference />} />
-              <Route path="parameters"      element={<ParameterChecker />} />
-              <Route path="calculator"      element={<TdsCalculator />} />
-              <Route path="remineralize"    element={<RemineralizationPlanner />} />
-              <Route path="breeding"        element={<BreedingTimeline />} />
-              <Route path="breeding-pairs"  element={<BreedingPairs />} />
-              <Route path="logbook"         element={<Logbook />} />
-              <Route path="charts"          element={<ParameterCharts />} />
-              <Route path="tds-creep"       element={<TdsCreepAnalyzer />} />
-              <Route path="molt"            element={<MoltTracker />} />
-              <Route path="grades"          element={<GradeLog />} />
-              <Route path="colony"          element={<ColonyEstimator />} />
-              <Route path="settings"        element={<SettingsPage />} />
+              <Route index                 element={<Dashboard />} />
+              <Route path="reference"      element={<Reference />} />
+              <Route path="parameters"     element={<ParameterChecker />} />
+              <Route path="calculator"     element={<TdsCalculator />} />
+              <Route path="remineralize"   element={<RemineralizationPlanner />} />
+              <Route path="breeding"       element={<BreedingTimeline />} />
+              <Route path="breeding-pairs" element={<BreedingPairs />} />
+              <Route path="logbook"        element={<Logbook />} />
+              <Route path="charts"         element={<ParameterCharts />} />
+              <Route path="tds-creep"      element={<TdsCreepAnalyzer />} />
+              <Route path="molt"           element={<MoltTracker />} />
+              <Route path="grades"         element={<GradeLog />} />
+              <Route path="colony"         element={<ColonyEstimator />} />
+              <Route path="settings"       element={<SettingsPage />} />
             </Route>
           </Routes>
         </AppShell>
