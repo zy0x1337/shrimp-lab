@@ -26,11 +26,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(loadData)
 
   useEffect(() => {
-    if (data.settings.theme === 'dark') {
-      document.documentElement.removeAttribute('data-theme')
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light')
-    }
+    // Torque style uses data-mode="dark"|"light" on <html>, not data-theme
+    document.documentElement.setAttribute('data-mode', data.settings.theme === 'light' ? 'light' : 'dark')
   }, [data.settings.theme])
 
   const ctx: DataCtx = {
