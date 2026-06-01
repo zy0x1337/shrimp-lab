@@ -18,7 +18,7 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 - [x] Dashboard with stats and breeding alerts
 - [x] JSON import/export + CSV log export
 - [x] Dark/Light mode (SEAM UI Torque)
-- [x] IndexedDB persistence (offline-first)
+- [x] Offline-first `localStorage` persistence
 
 ---
 
@@ -46,48 +46,39 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 ---
 
-## 🔧 Phase A — Stabilization & UX Debt *(in progress)*
+## 🔧 Phase A — Stabilisierung *(in progress)*
 
-> Structural gaps and daily-use friction that should be resolved before new features are layered on top.
+Structural and UX debt to resolve before new features are added.
 
-- [ ] **Empty states for all pages** — every page beyond Dashboard currently renders a blank container when no data exists; each needs a warm message + primary action
-- [ ] **Settings UX: theme toggle** — make the dark/light toggle a first-class control in Settings, not buried in the sidebar
-- [ ] **Tablet layout** — 220px fixed sidebar + 860px content is broken on iPad Mini and similar; sidebar should collapse or adapt at mid-range viewports
-- [ ] **Keyboard navigation & focus traps** — modal/overlay pages lack focus traps; Tab escapes overlays and breaks screen reader flow
-- [ ] **Import schema versioning** — JSON export has no schema version field; old exports silently break when data model changes; add `version` field + migration layer
+- [x] **A1** — Correct docs: `localStorage` persistence accurately documented in README + ROADMAP
+- [ ] **A3** — Empty states for all 13 pages (no blank containers when data is missing) → [#6](https://github.com/zy0x1337/shrimp-lab/issues/6)
+- [ ] **A4** — Keyboard navigation & focus traps for modals/overlays → [#10](https://github.com/zy0x1337/shrimp-lab/issues/10)
+- [ ] **A5** — Import/Export schema versioning & migration safety → [#11](https://github.com/zy0x1337/shrimp-lab/issues/11)
+- [ ] Tablet-optimized layout (sidebar + content area on iPad)
 
 ---
 
-## 🧦 v0.4 — Genetics Calculator
+## 🧬 v0.4 — Genetics Calculator
 
-**v0.4.0 MVP:**
-- [ ] **Punnett Square calculator** — single-generation cross logic for CRS × CBS, Mosura × Shadow Panda, and basic Neo colour morphs
-- [ ] **Probability output** — visual table of offspring ratios per morph/colour
-- [ ] **Breeding pair integration** — direct link from a Breeding Pair to the Genetics calculator with parent grades pre-filled
-
-**v0.4.1:**
+- [ ] **Genetics calculator** — Punnett Square logic for CRS × CBS, Mosura × Shadow Panda, Neo colour morphs
 - [ ] **Breeding Line Tracker** — multi-generation lineage view, parent line linking, goal tracking
 
 ---
 
 ## 💧 v0.5 — Advanced Water Chemistry
 
-*Ordered by build effort vs. user impact:*
-
-- [ ] **Osmosis calculator** — RO/tap blend ratios to hit a target TDS — direct extension of the existing remineralization workflow
+- [ ] **Osmosis calculator** — RO/tap blend ratios to hit target TDS
 - [ ] **Mineral ratio calculator** — GH:KH ratio analysis, Ca:Mg ratio for remineralization products
-- [ ] **Water change scheduler** — track upcoming water changes per tank; hook for PWA push reminders (v0.8 prep)
-- [ ] **Nitrate/Nitrite/Ammonia tracking** — full nitrogen cycle logging via Logbook extension with safe range indicators
-- [ ] **Soil buffering estimator** — track KH-absorbing substrate lifespan (ADA Amazonia, Aquario Neo, etc.)
+- [ ] **Water change scheduler** — track upcoming water changes per tank, PWA push reminders
 - [ ] **Extended remineralizer database** — Salty Shrimp GH+, GH/KH+, Bee Shrimp Mineral GH+, community-contributed products
+- [ ] **Nitrate/Nitrite/Ammonia tracking** — full nitrogen cycle logging with safe range indicators
+- [ ] **Soil buffering estimator** — track KH-absorbing substrate lifespan (ADA Amazonia, Aquario Neo, etc.)
 
 ---
 
 ## 📸 v0.6 — Media & Documentation
 
-> Depends on a stable DB schema from v0.5 before implementing base64 photo storage.
-
-- [ ] **Photo attachments** — attach images to log entries and tank profiles (stored as base64 in IndexedDB)
+- [ ] **Photo attachments** — attach images to log entries and tank profiles (stored as base64 in `localStorage`)
 - [ ] **Tank gallery** — visual timeline of tank photos per profile
 - [ ] **Shrimp registry** — catalog individual named/notable shrimp with photos, weight, grade
 
@@ -123,13 +114,13 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 ## 💡 Backlog / Under Consideration
 
-- Accessibility audit + screen reader support *(move up after Phase A)*
 - Planted tank mode (CO2, fertilizer dosing calculator)
 - Disease symptom identifier
 - Quarantine tank tracker
 - Auction/sale log
 - Shop / breeder directory
 - Export to AquaStic / Aquarium Note compatible format
+- Accessibility audit + screen reader support
 - Printable parameter cards (PDF export)
 
 ---
