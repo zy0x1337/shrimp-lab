@@ -26,30 +26,37 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 - [x] **PWA manifest** — `manifest.json` with all required icon sizes, theme color, display mode
 - [x] **Service Worker** — cache-first for assets, network-first for navigation, offline fallback
-- [x] **SW registration** — automatic on page load via inline script in `index.html`
-- [x] **Parameter trend charts** — per-tank SVG line charts for TDS, GH, KH, pH, Temp with target band overlays and 7/14/30/90-day range selector
+- [x] **SW registration** — automatic on page load
+- [x] **Parameter trend charts** — per-tank SVG line charts for TDS, GH, KH, pH, Temp with target band overlays
 - [x] **TDS Creep Analyzer** — per-measurement rise tracking, avg. rise/day, evaporation warnings
-- [x] **Feeding log category** — food type, amount (g), fully integrated into Logbook filters and CSV export
-- [x] App icons placeholder structure (`public/icons/`)
-- [x] Apple PWA meta tags (`apple-mobile-web-app-capable`, status bar, touch icon)
+- [x] **Feeding log category** — food type, amount (g), integrated into Logbook
+- [x] Apple PWA meta tags
 
 ---
 
-## 🧬 v0.3 — Breeding & Genetics
+## ✅ v0.3 — Breeding & Tracking *(shipped)*
 
-- [ ] **Breeding line tracker** — family trees for breeding projects, parent/offspring linking
-- [ ] **Genetics calculator** — predict offspring color grades (e.g. CRS × CBS, Mosura × Shadow Panda)
-- [ ] **Colony population estimator** — estimate colony size from tank size, density rules, berried %, observed shrimplets
-- [ ] **Molt tracker** — log molt events, detect molt issues (failed molts, white ring of death indicators)
-- [ ] **Breeding pair manager** — track specific male/female pairings, litter history, hatch rates
-- [ ] **Grade/quality logging** — log individual shrimp grades (S, SS, SSS for Caridina; color intensity for Neo)
+- [x] **Breeding Pair Manager** — track male/female pairings with names, grades (S/SS/SSS/SSSS), tank, start/end dates; active vs. retired view
+- [x] **Molt Tracker** — dedicated molt logging with status (Normal / Failed molt / White Ring of Death), per-tank summary stats and deficiency warnings
+- [x] **Grade Log** — quality grade assessments (S–SSSS + custom), distribution view per tank, morph-aware notes
+- [x] **Colony Estimator** — population estimate from tank volume × stocking density, plus observation-based estimates from berried % or shrimplet multiplier
+- [x] `grade` log category + `moltStatus` field added to `LogEntry`
+- [x] `BreedingPair` and `BreedingLine` types added to data model
+- [x] Sidebar grouped into Overview / Water / Breeding / Data sections
 
 ---
 
-## 💧 v0.4 — Advanced Water Chemistry
+## 🧬 v0.4 — Genetics Calculator
+
+- [ ] **Genetics calculator** — Punnett Square logic for CRS × CBS, Mosura × Shadow Panda, Neo colour morphs
+- [ ] **Breeding Line Tracker** — multi-generation lineage view, parent line linking, goal tracking
+
+---
+
+## 💧 v0.5 — Advanced Water Chemistry
 
 - [ ] **Mineral ratio calculator** — GH:KH ratio analysis, Ca:Mg ratio for remineralization products
-- [ ] **Water change scheduler** — track upcoming water changes per tank, send reminder notifications (PWA push)
+- [ ] **Water change scheduler** — track upcoming water changes per tank, PWA push reminders
 - [ ] **Extended remineralizer database** — Salty Shrimp GH+, GH/KH+, Bee Shrimp Mineral GH+, community-contributed products
 - [ ] **Nitrate/Nitrite/Ammonia tracking** — full nitrogen cycle logging with safe range indicators
 - [ ] **Soil buffering estimator** — track KH-absorbing substrate lifespan (ADA Amazonia, Aquario Neo, etc.)
@@ -57,50 +64,49 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 ---
 
-## 📸 v0.5 — Media & Documentation
+## 📸 v0.6 — Media & Documentation
 
 - [ ] **Photo attachments** — attach images to log entries and tank profiles (stored as base64 in IndexedDB)
 - [ ] **Tank gallery** — visual timeline of tank photos per profile
 - [ ] **Shrimp registry** — catalog individual named/notable shrimp with photos, weight, grade
-- [ ] **Video log entries** — short clip attachments for breeding events, interesting behaviors
 
 ---
 
-## 🌍 v0.6 — Species Database
+## 🌍 v0.7 — Species Database
 
 - [ ] **Extended species database** — beyond Cherry/Crystal: Sulawesi, Caridina spinata, Neocaridina zhangjiajiensis, etc.
-- [ ] **Compatibility checker** — can these two species share a tank? (water params, temperament, hybridization risk)
+- [ ] **Compatibility checker** — can these two species share a tank?
 - [ ] **Color morph reference** — visual guide to Neo and Caridina color grades with breeding notes
-- [ ] **Plant compatibility** — which plants thrive in shrimp water parameters, CO2 sensitivity
+- [ ] **Plant compatibility** — which plants thrive in shrimp water parameters
 - [ ] **Medication safety database** — flag copper, fenbendazole, and other shrimp-unsafe treatments
 
 ---
 
-## 🔔 v0.7 — Notifications & Automation
+## 🔔 v0.8 — Notifications & Automation
 
 - [ ] **PWA push notifications** — water change reminders, hatch window alerts, feeding schedule
 - [ ] **Hatch window notifications** — alert when a berried female enters her hatch window
-- [ ] **Parameter anomaly alerts** — flag unusual values in the logbook (outside range = warning badge)
-- [ ] **Feeding schedule** — configure per-tank feeding days and times, auto-log feeding events
+- [ ] **Parameter anomaly alerts** — flag unusual values in the logbook
+- [ ] **Feeding schedule** — configure per-tank feeding days and times
 
 ---
 
-## 🌐 v0.8 — Optional Sync (still offline-first)
+## 🌐 v0.9 — Optional Sync
 
-- [ ] **Manual cloud backup** — opt-in export to a personal storage provider (e.g. pCloud, Backblaze) — no proprietary cloud
-- [ ] **Cross-device sync via file** — QR-code-based data transfer between devices (no server needed)
+- [ ] **Manual cloud backup** — opt-in export to personal storage (pCloud, Backblaze) — no proprietary cloud
+- [ ] **Cross-device sync via file** — QR-code-based data transfer (no server needed)
 - [ ] **Multi-language support** — i18n framework (DE, EN, FR, NL, PL priority)
-- [ ] **Community parameter presets** — shareable JSON configs for popular breeding setups
+- [ ] **Community parameter presets** — shareable JSON configs
 
 ---
 
 ## 💡 Backlog / Under Consideration
 
 - Planted tank mode (CO2, fertilizer dosing calculator)
-- Disease symptom identifier (visual symptom checklist → likely cause)
+- Disease symptom identifier
 - Quarantine tank tracker
-- Auction/sale log (track shrimp sold, prices, buyers)
-- Shop / breeder directory (static community-maintained list)
+- Auction/sale log
+- Shop / breeder directory
 - Export to AquaStic / Aquarium Note compatible format
 - Accessibility audit + screen reader support
 - Tablet-optimized layout
@@ -110,7 +116,7 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 ## Contributing
 
-Want to work on something? Open an issue and mention this roadmap item. PRs targeting `main` are welcome — please include a short description of what was changed and why.
+Want to work on something? Open an issue and mention this roadmap item. PRs targeting `main` are welcome.
 
 See [README.md](README.md) for setup instructions.
 
