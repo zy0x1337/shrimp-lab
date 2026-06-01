@@ -1,261 +1,244 @@
 import { useState } from 'react'
 import { useData } from '../lib/DataContext'
-import { CATEGORY_LABELS, CATEGORY_ICONS } from '../lib/species'
 import type { LogCategory, LogEntry } from '../lib/types'
-import { Plus, X, Pencil } from 'lucide-react'
+import { Pencil, Trash2, Check, X } from 'lucide-react'
 
-const CATEGORIES: LogCategory[] = ['water_test', 'molt', 'death', 'berried', 'shrimplets', 'maintenance', 'note']
+const CATEGORIES: { value: LogCategory; label: string; emoji: string }[] = [
+  { value: 'water_test',  label: 'Water Test',  emoji: '🧪' },
+  { value: 'feeding',     label: 'Feeding',      emoji: '🍽️' },
+  { value: 'molt',        label: 'Molt',         emoji: '🦐' },
+  { value: 'berried',     label: 'Berried',      emoji: '🥚' },
+  { value: 'shrimplets',  label: 'Shrimplets',   emoji: '🐣' },
+  { value: 'death',       label: 'Death',        emoji: '💀' },
+  { value: 'maintenance', label: 'Maintenance',  emoji: '🔧' },
+  { value: 'note',        label: 'Note',         emoji: '📝' },
+]
+
+function fmtDate(iso: string) {
+  const d = new Date(iso)
+  return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
+}
 
 export function Logbook() {
   const { data, addLog, updateLog, deleteLog } = useData()
-  const [showForm, setShowForm] = useState(false)
+  const [filter, setFilter] = useState<LogCategory | 'all'>('all')
+  const [tankFilter, setTankFilter] = useState<string>('all')
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [tankId, setTankId] = useState(data.tanks[0]?.id ?? '')
-  const [category, setCategory] = useState<LogCategory>('water_test')
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
-  const [notes, setNotes] = useState('')
-  const [vals, setVals] = useState({ tds: '', gh: '', kh: '', ph: '', tempC: '', count: '', waterChangePct: '' })
-  const [filter, setFilter] = useState<LogCategory | ''>('')
 
-  const resetForm = () => {
-    setEditingId(null)
-    setTankId(data.tanks[0]?.id ?? '')
-    setCategory('water_test')
-    setDate(new Date().toISOString().slice(0, 10))
-    setNotes('')
-    setVals({ tds: '', gh: '', kh: '', ph: '', tempC: '', count: '', waterChangePct: '' })
-    setShowForm(false)
-  }
+  // New entry form
+  const [newDate, setNewDate] = useState(new Date().toISOString().slice(0, 10))
+  const [newTankId, setNewTankId] = useState(data.tanks[0]?.id ?? '')
+  const [newCat, setNewCat] = useState<LogCategory>('water_test')
+  const [newNotes, setNewNotes] = useState('')
+  // water test values
+  const [newTds, setNewTds] = useState('')
+  const [newGh, setNewGh]   = useState('')
+  const [newKh, setNewKh]   = useState('')
+  const [newPh, setNewPh]   = useState('')
+  const [newTemp, setNewTemp] = useState('')
+  const [newWaterChangePct, setNewWaterChangePct] = useState('')
+  // feeding
+  const [newFoodType, setNewFoodType] = useState('')
+  const [newFoodAmount, setNewFoodAmount] = useState('')
+  // count (molts, deaths, shrimplets, berried)
+  const [newCount, setNewCount] = useState('')
 
-  const openNew = () => {
-    resetForm()
-    setShowForm(true)
-  }
-
-  const openEdit = (log: LogEntry) => {
-    setEditingId(log.id)
-    setTankId(log.tankId)
-    setCategory(log.category)
-    setDate(log.date)
-    setNotes(log.notes ?? '')
-    setVals({
-      tds: log.values?.tds?.toString() ?? '',
-      gh: log.values?.gh?.toString() ?? '',
-      kh: log.values?.kh?.toString() ?? '',
-      ph: log.values?.ph?.toString() ?? '',
-      tempC: log.values?.tempC?.toString() ?? '',
-      count: log.values?.count?.toString() ?? '',
-      waterChangePct: log.values?.waterChangePct?.toString() ?? '',
-    })
-    setShowForm(true)
-  }
-
-  const submit = () => {
-    if (!tankId) return
-
-    const entryValues = {
-      tds: vals.tds ? parseFloat(vals.tds) : undefined,
-      gh: vals.gh ? parseFloat(vals.gh) : undefined,
-      kh: vals.kh ? parseFloat(vals.kh) : undefined,
-      ph: vals.ph ? parseFloat(vals.ph) : undefined,
-      tempC: vals.tempC ? parseFloat(vals.tempC) : undefined,
-      count: vals.count ? parseInt(vals.count) : undefined,
-      waterChangePct: vals.waterChangePct ? parseFloat(vals.waterChangePct) : undefined,
+  const handleAdd = () => {
+    if (!newTankId) return
+    const values: LogEntry['values'] = {}
+    if (newCat === 'water_test') {
+      if (newTds)           values.tds           = parseFloat(newTds)
+      if (newGh)            values.gh            = parseFloat(newGh)
+      if (newKh)            values.kh            = parseFloat(newKh)
+      if (newPh)            values.ph            = parseFloat(newPh)
+      if (newTemp)          values.tempC         = parseFloat(newTemp)
+      if (newWaterChangePct) values.waterChangePct = parseFloat(newWaterChangePct)
+    } else if (newCat === 'feeding') {
+      if (newFoodType)   values.foodType    = newFoodType.trim()
+      if (newFoodAmount) values.foodAmountG = parseFloat(newFoodAmount)
+    } else if (['molt', 'death', 'berried', 'shrimplets'].includes(newCat)) {
+      if (newCount) values.count = parseInt(newCount)
     }
-
-    if (editingId) {
-      updateLog(editingId, {
-        date, tankId, category, notes: notes || undefined, values: entryValues,
-      })
-    } else {
-      addLog({
-        date, tankId, category, notes: notes || undefined, values: entryValues,
-      })
-    }
-    resetForm()
+    addLog({ date: newDate, tankId: newTankId, category: newCat, values: Object.keys(values).length ? values : undefined, notes: newNotes.trim() || undefined })
+    setNewNotes(''); setNewTds(''); setNewGh(''); setNewKh(''); setNewPh(''); setNewTemp('')
+    setNewWaterChangePct(''); setNewFoodType(''); setNewFoodAmount(''); setNewCount('')
   }
 
-  const logs = [...data.logs]
-    .filter(l => !filter || l.category === filter)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 100)
+  const filtered = data.logs
+    .filter(l => filter === 'all' || l.category === filter)
+    .filter(l => tankFilter === 'all' || l.tankId === tankFilter)
+    .sort((a, b) => b.date.localeCompare(a.date))
 
-  const formatParamValue = (log: LogEntry): string => {
-    const parts: string[] = []
-    if (log.values?.tds != null) parts.push(`TDS ${log.values.tds}`)
-    if (log.values?.gh != null) parts.push(`GH ${log.values.gh}`)
-    if (log.values?.kh != null) parts.push(`KH ${log.values.kh}`)
-    if (log.values?.ph != null) parts.push(`pH ${log.values.ph}`)
-    if (log.values?.tempC != null) parts.push(`${log.values.tempC}°C`)
-    if (log.values?.count != null) parts.push(`×${log.values.count}`)
-    if (log.values?.waterChangePct != null) parts.push(`${log.values.waterChangePct}% WC`)
-    return parts.join(' · ') || '—'
-  }
+  const tankName = (id: string) => data.tanks.find(t => t.id === id)?.name ?? id
 
   return (
     <div>
-      <div className="page-header flex-between">
-        <div>
-          <h1 className="page-title">Logbook</h1>
-          <p className="page-subtitle">Record water tests, molts, deaths, berried females, and notes.</p>
+      <div className="page-header">
+        <h1 className="page-title">Logbook</h1>
+        <p className="page-subtitle">Record water tests, feedings, molts, and events.</p>
+      </div>
+
+      {/* Add entry */}
+      <div className="card mb-2">
+        <div className="card-header">Add Entry</div>
+        <div className="grid-2">
+          <div>
+            <label>Date</label>
+            <input className="input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+          </div>
+          <div>
+            <label>Tank</label>
+            <select className="select" value={newTankId} onChange={e => setNewTankId(e.target.value)}>
+              {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
         </div>
-        <button className="btn btn-primary" onClick={openNew} disabled={data.tanks.length === 0}>
-          <Plus size={16} /> New Entry
+        <div style={{ marginTop: 8 }}>
+          <label>Category</label>
+          <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginTop: 4 }}>
+            {CATEGORIES.map(c => (
+              <button
+                key={c.value}
+                className={`btn btn-sm ${newCat === c.value ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => setNewCat(c.value)}
+              >
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Context fields */}
+        {newCat === 'water_test' && (
+          <div className="grid-3" style={{ marginTop: 8 }}>
+            <div><label>TDS (ppm)</label><input className="input" type="number" placeholder="200" value={newTds} onChange={e => setNewTds(e.target.value)} /></div>
+            <div><label>GH (°dGH)</label><input className="input" type="number" placeholder="7" value={newGh} onChange={e => setNewGh(e.target.value)} /></div>
+            <div><label>KH (°dKH)</label><input className="input" type="number" placeholder="3" value={newKh} onChange={e => setNewKh(e.target.value)} /></div>
+            <div><label>pH</label><input className="input" type="number" step="0.1" placeholder="7.2" value={newPh} onChange={e => setNewPh(e.target.value)} /></div>
+            <div><label>Temp (°C)</label><input className="input" type="number" placeholder="22" value={newTemp} onChange={e => setNewTemp(e.target.value)} /></div>
+            <div><label>Water change (%)</label><input className="input" type="number" placeholder="20" value={newWaterChangePct} onChange={e => setNewWaterChangePct(e.target.value)} /></div>
+          </div>
+        )}
+        {newCat === 'feeding' && (
+          <div className="grid-2" style={{ marginTop: 8 }}>
+            <div><label>Food type</label><input className="input" placeholder="e.g. Hikari Shrimp Cuisine" value={newFoodType} onChange={e => setNewFoodType(e.target.value)} /></div>
+            <div><label>Amount (g)</label><input className="input" type="number" step="0.1" placeholder="0.5" value={newFoodAmount} onChange={e => setNewFoodAmount(e.target.value)} /></div>
+          </div>
+        )}
+        {['molt', 'death', 'berried', 'shrimplets'].includes(newCat) && (
+          <div style={{ marginTop: 8, maxWidth: 160 }}>
+            <label>Count</label>
+            <input className="input" type="number" min="1" placeholder="1" value={newCount} onChange={e => setNewCount(e.target.value)} />
+          </div>
+        )}
+
+        <div style={{ marginTop: 8 }}>
+          <label>Notes (optional)</label>
+          <input className="input" placeholder="Any additional notes…" value={newNotes} onChange={e => setNewNotes(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()} />
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={handleAdd} style={{ marginTop: 8, width: 'fit-content' }}
+          disabled={!newTankId}>
+          Add Entry
         </button>
       </div>
 
-      {data.tanks.length === 0 && (
-        <div className="card mb-2" style={{ background: 'var(--color-accent-muted)', fontSize: '0.85rem' }}>
-          ⚠️ Add a tank in Settings before logging entries.
+      {/* Filters */}
+      <div className="card mb-2">
+        <div className="flex-row gap-1" style={{ flexWrap: 'wrap', marginBottom: 8 }}>
+          <button className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('all')}>All</button>
+          {CATEGORIES.map(c => (
+            <button key={c.value} className={`btn btn-sm ${filter === c.value ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter(c.value)}>
+              {c.emoji} {c.label}
+            </button>
+          ))}
         </div>
-      )}
-
-      {/* Filter */}
-      <div className="flex-row gap-1 mb-2" style={{ flexWrap: 'wrap' }}>
-        <button className={`btn btn-sm ${!filter ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('')}>All</button>
-        {CATEGORIES.map(c => (
-          <button key={c} className={`btn btn-sm ${filter === c ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter(c)}>
-            {CATEGORY_ICONS[c]} {CATEGORY_LABELS[c]}
-          </button>
-        ))}
+        <select className="select" style={{ width: 'fit-content' }} value={tankFilter} onChange={e => setTankFilter(e.target.value)}>
+          <option value="all">All tanks</option>
+          {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
       </div>
 
-      {/* Entry Form Modal */}
-      {showForm && (
-        <div className="modal-overlay" onClick={resetForm}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '520px' }}>
-            <div className="flex-between mb-2">
-              <h3 style={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                {editingId ? 'Edit Entry' : 'New Log Entry'}
-              </h3>
-              <button className="btn btn-ghost btn-sm" onClick={resetForm}><X size={16} /></button>
-            </div>
+      {/* Entries */}
+      <div className="card">
+        {filtered.length === 0 && <p className="text-sm text-muted">No entries yet.</p>}
+        {filtered.map(entry => (
+          <LogRow
+            key={entry.id}
+            entry={entry}
+            tankName={tankName(entry.tankId)}
+            editing={editingId === entry.id}
+            onEdit={() => setEditingId(entry.id)}
+            onSave={(patch) => { updateLog(entry.id, patch); setEditingId(null) }}
+            onCancel={() => setEditingId(null)}
+            onDelete={() => deleteLog(entry.id)}
+            tanks={data.tanks}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div>
-                <label>Tank</label>
-                <select className="select" value={tankId} onChange={e => setTankId(e.target.value)}>
-                  {data.tanks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              </div>
+// ── Log row with inline edit ───────────────────────────────────────────────────
+function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete, tanks }: {
+  entry: LogEntry
+  tankName: string
+  editing: boolean
+  onEdit: () => void
+  onSave: (p: Partial<LogEntry>) => void
+  onCancel: () => void
+  onDelete: () => void
+  tanks: { id: string; name: string }[]
+}) {
+  const [notes, setNotes] = useState(entry.notes ?? '')
+  const cat = CATEGORIES.find(c => c.value === entry.category)
 
-              <div>
-                <label>Category</label>
-                <select className="select" value={category} onChange={e => setCategory(e.target.value as LogCategory)}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_ICONS[c]} {CATEGORY_LABELS[c]}</option>)}
-                </select>
-              </div>
+  function summarize(e: LogEntry) {
+    const v = e.values
+    if (!v) return ''
+    const parts: string[] = []
+    if (v.tds)           parts.push(`TDS ${v.tds}`)
+    if (v.gh)            parts.push(`GH ${v.gh}`)
+    if (v.kh)            parts.push(`KH ${v.kh}`)
+    if (v.ph)            parts.push(`pH ${v.ph}`)
+    if (v.tempC)         parts.push(`${v.tempC}°C`)
+    if (v.waterChangePct) parts.push(`WC ${v.waterChangePct}%`)
+    if (v.foodType)      parts.push(v.foodType)
+    if (v.foodAmountG)   parts.push(`${v.foodAmountG}g`)
+    if (v.count)         parts.push(`×${v.count}`)
+    return parts.join(' · ')
+  }
 
-              <div>
-                <label>Date</label>
-                <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} />
-              </div>
+  if (editing) {
+    return (
+      <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <input className="input" style={{ flex: 1 }} value={notes} onChange={e => setNotes(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') onSave({ notes: notes.trim() || undefined }) }} />
+        <button className="btn btn-sm btn-primary" onClick={() => onSave({ notes: notes.trim() || undefined })}><Check size={13} /></button>
+        <button className="btn btn-sm btn-ghost" onClick={onCancel}><X size={13} /></button>
+      </div>
+    )
+  }
 
-              {/* Show relevant value inputs based on category */}
-              {category === 'water_test' && (
-                <div className="grid-2">
-                  {[['tds', 'TDS (ppm)'], ['gh', 'GH (°dGH)'], ['kh', 'KH (°dKH)'], ['ph', 'pH'], ['tempC', 'Temp (°C)']].map(([k, l]) => (
-                    <div key={k}>
-                      <label>{l}</label>
-                      <input className="input" type="number" step="0.1" placeholder="—"
-                        value={vals[k as keyof typeof vals]}
-                        onChange={e => setVals(v => ({ ...v, [k]: e.target.value }))} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {category === 'maintenance' && (
-                <div>
-                  <label>Water Change (%)</label>
-                  <input className="input" type="number" step="1" placeholder="e.g. 30"
-                    value={vals.waterChangePct}
-                    onChange={e => setVals(v => ({ ...v, waterChangePct: e.target.value }))} />
-                </div>
-              )}
-
-              {(category === 'molt' || category === 'death' || category === 'berried' || category === 'shrimplets') && (
-                <div>
-                  <label>Count</label>
-                  <input className="input" type="number" step="1" placeholder="e.g. 1"
-                    value={vals.count}
-                    onChange={e => setVals(v => ({ ...v, count: e.target.value }))} />
-                </div>
-              )}
-
-              <div>
-                <label>Notes (optional)</label>
-                <textarea className="input" rows={3} placeholder="Any observations…"
-                  value={notes} onChange={e => setNotes(e.target.value)}
-                  style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} />
-              </div>
-
-              <div className="flex-row gap-1">
-                <button className="btn btn-primary" onClick={submit}>
-                  {editingId ? 'Update Entry' : 'Save Entry'}
-                </button>
-                {editingId && (
-                  <button className="btn btn-ghost" onClick={resetForm}>Cancel</button>
-                )}
-              </div>
-            </div>
+  return (
+    <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-divider)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <span style={{ fontSize: '1rem', lineHeight: 1.4 }}>{cat?.emoji}</span>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>
+            {cat?.label}
+            <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', marginLeft: 6 }}>{tankName}</span>
+            <span style={{ fontWeight: 400, color: 'var(--color-text-faint)', marginLeft: 6, fontSize: 'var(--text-xs)' }}>{fmtDate(entry.date)}</span>
           </div>
+          {summarize(entry) && <div className="text-xs text-muted" style={{ marginTop: 2 }}>{summarize(entry)}</div>}
+          {entry.notes && <div className="text-xs" style={{ marginTop: 2, color: 'var(--color-text-muted)' }}>{entry.notes}</div>}
         </div>
-      )}
-
-      {/* Log entries */}
-      {logs.length > 0 ? (
-        <div className="table-wrap card">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Tank</th>
-                <th>Category</th>
-                <th>Values</th>
-                <th>Notes</th>
-                <th style={{ width: '80px' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map(log => {
-                const tank = data.tanks.find(t => t.id === log.tankId)
-                return (
-                  <tr key={log.id}>
-                    <td className="mono text-xs">{new Date(log.date).toLocaleDateString('de-DE')}</td>
-                    <td>{tank?.name ?? '—'}</td>
-                    <td>
-                      <span style={{ fontSize: '0.8rem' }}>
-                        {CATEGORY_ICONS[log.category]} {CATEGORY_LABELS[log.category]}
-                      </span>
-                    </td>
-                    <td className="mono text-xs">{formatParamValue(log)}</td>
-                    <td className="text-sm" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {log.notes || '—'}
-                    </td>
-                    <td>
-                      <div className="flex-row gap-1">
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(log)} title="Edit">
-                          <Pencil size={14} />
-                        </button>
-                        <button className="btn btn-danger btn-sm" onClick={() => deleteLog(log.id)} title="Delete">
-                          <X size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="card empty-state">
-          <div className="empty-state-icon">📖</div>
-          <div className="empty-state-title">No entries yet</div>
-          <div className="empty-state-text">Start logging water tests, molts, and other events to track your tanks over time.</div>
-        </div>
-      )}
+      </div>
+      <div className="flex-row gap-1">
+        <button className="btn btn-sm btn-ghost" onClick={onEdit}><Pencil size={13} /></button>
+        <button className="btn btn-sm btn-danger" onClick={onDelete}><Trash2 size={13} /></button>
+      </div>
     </div>
   )
 }

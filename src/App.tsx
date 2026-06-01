@@ -9,6 +9,8 @@ import { RemineralizationPlanner } from './pages/RemineralizationPlanner'
 import { BreedingTimeline } from './pages/BreedingTimeline'
 import { Logbook } from './pages/Logbook'
 import { SettingsPage } from './pages/Settings'
+import { ParameterCharts } from './pages/ParameterCharts'
+import { TdsCreepAnalyzer } from './pages/TdsCreepAnalyzer'
 
 function Layout() {
   return (
@@ -34,6 +36,8 @@ export default function App() {
             <Route path="remineralize" element={<RemineralizationPlanner />} />
             <Route path="breeding" element={<BreedingTimeline />} />
             <Route path="logbook" element={<Logbook />} />
+            <Route path="charts" element={<ParameterCharts />} />
+            <Route path="tds-creep" element={<TdsCreepAnalyzer />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>

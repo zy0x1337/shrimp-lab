@@ -22,14 +22,16 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 
 ---
 
-## 🔧 v0.2 — PWA & Core Polish *(next)*
+## ✅ v0.2 — PWA & Core Polish *(shipped)*
 
-- [ ] **PWA manifest + Service Worker** — installable on mobile/desktop, full offline support
-- [ ] **App icon set** — all required sizes for Android, iOS, desktop
-- [ ] **Parameter trend charts** — visualize TDS, pH, GH, KH over time per tank (line charts)
-- [ ] **TDS Creep Analyzer** — track TDS rise between water changes, detect evaporation vs contamination
-- [ ] **Printable parameter cards** — one-tap PDF export of target ranges per species
-- [ ] **Feeding log category** — record feeding events, food types, amounts
+- [x] **PWA manifest** — `manifest.json` with all required icon sizes, theme color, display mode
+- [x] **Service Worker** — cache-first for assets, network-first for navigation, offline fallback
+- [x] **SW registration** — automatic on page load via inline script in `index.html`
+- [x] **Parameter trend charts** — per-tank SVG line charts for TDS, GH, KH, pH, Temp with target band overlays and 7/14/30/90-day range selector
+- [x] **TDS Creep Analyzer** — per-measurement rise tracking, avg. rise/day, evaporation warnings
+- [x] **Feeding log category** — food type, amount (g), fully integrated into Logbook filters and CSV export
+- [x] App icons placeholder structure (`public/icons/`)
+- [x] Apple PWA meta tags (`apple-mobile-web-app-capable`, status bar, touch icon)
 
 ---
 
@@ -102,6 +104,7 @@ This roadmap is roughly ordered by priority. Items within a phase may ship in an
 - Export to AquaStic / Aquarium Note compatible format
 - Accessibility audit + screen reader support
 - Tablet-optimized layout
+- Printable parameter cards (PDF export)
 
 ---
 
