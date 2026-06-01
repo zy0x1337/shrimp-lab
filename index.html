@@ -2,8 +2,16 @@
 <html lang="en" data-style="torque" data-mode="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Offline-first toolkit for freshwater shrimp keepers and breeders." />
+    <meta name="theme-color" content="#1a5eff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Shrimp Lab" />
+
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- IBM Plex Sans (body) + JetBrains Mono (display/mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,9 +23,8 @@
     <script>
       /* Dark/light mode — reads system preference, respects data-mode override */
       (function () {
-        var stored = null;
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var mode = stored || (prefersDark ? 'dark' : 'light');
+        var mode = prefersDark ? 'dark' : 'light';
         document.documentElement.setAttribute('data-mode', mode);
       })();
     </script>
@@ -25,5 +32,15 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      /* Register Service Worker */
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function (err) {
+            console.warn('SW registration failed:', err)
+          })
+        })
+      }
+    </script>
   </body>
 </html>

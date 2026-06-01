@@ -36,6 +36,7 @@ export type LogCategory =
   | 'berried'
   | 'shrimplets'
   | 'maintenance'
+  | 'feeding'
   | 'note'
 
 export interface LogEntry {
@@ -51,6 +52,9 @@ export interface LogEntry {
     tempC?: number
     count?: number
     waterChangePct?: number
+    // feeding
+    foodType?: string
+    foodAmountG?: number
   }
   notes?: string
 }
