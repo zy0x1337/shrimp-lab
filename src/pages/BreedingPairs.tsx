@@ -6,11 +6,6 @@ import { Plus, Trash2, Archive, ArchiveRestore } from 'lucide-react'
 
 const GRADES: ShrimpGrade[] = ['S', 'SS', 'SSS', 'SSSS', 'custom']
 
-function fmtDate(iso: string) {
-  const d = new Date(iso)
-  return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`
-}
-
 export function BreedingPairs() {
   const { data, addBreedingPair, updateBreedingPair, deleteBreedingPair } = useData()
   const [showRetired, setShowRetired] = useState(false)

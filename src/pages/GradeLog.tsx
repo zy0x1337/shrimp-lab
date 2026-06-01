@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useData } from '../lib/DataContext'
-import type { ShrimpGrade, SpeciesType } from '../lib/types'
+import type { ShrimpGrade } from '../lib/types'
 import { Plus, Star } from 'lucide-react'
 
 const GRADES: ShrimpGrade[] = ['S', 'SS', 'SSS', 'SSSS', 'custom']

@@ -172,7 +172,6 @@ export function Logbook() {
             onSave={(patch) => { updateLog(entry.id, patch); setEditingId(null) }}
             onCancel={() => setEditingId(null)}
             onDelete={() => deleteLog(entry.id)}
-            tanks={data.tanks}
           />
         ))}
       </div>
@@ -181,7 +180,7 @@ export function Logbook() {
 }
 
 // ── Log row with inline edit ───────────────────────────────────────────────────
-function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete, tanks }: {
+function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete }: {
   entry: LogEntry
   tankName: string
   editing: boolean
@@ -189,7 +188,6 @@ function LogRow({ entry, tankName, editing, onEdit, onSave, onCancel, onDelete, 
   onSave: (p: Partial<LogEntry>) => void
   onCancel: () => void
   onDelete: () => void
-  tanks: { id: string; name: string }[]
 }) {
   const [notes, setNotes] = useState(entry.notes ?? '')
   const cat = CATEGORIES.find(c => c.value === entry.category)
