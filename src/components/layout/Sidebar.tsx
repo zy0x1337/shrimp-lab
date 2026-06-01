@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, FlaskConical, TestTube, Droplets, Beaker,
@@ -6,24 +7,21 @@ import {
 } from 'lucide-react'
 import { useTheme } from '../../lib/ThemeContext'
 import { useData } from '../../lib/DataContext'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 const NAV = [
-  // Core
   { to: '/',               label: 'Dashboard',        icon: LayoutDashboard, group: 'core' },
   { to: '/reference',      label: 'Reference',        icon: FlaskConical,    group: 'core' },
-  // Water
   { to: '/parameters',     label: 'Parameter Check',  icon: TestTube,        group: 'water' },
   { to: '/calculator',     label: 'TDS Calculator',   icon: Droplets,        group: 'water' },
   { to: '/remineralize',   label: 'Remineralization', icon: Beaker,          group: 'water' },
   { to: '/charts',         label: 'Parameter Charts', icon: LineChart,       group: 'water' },
   { to: '/tds-creep',      label: 'TDS Creep',        icon: TrendingUp,      group: 'water' },
-  // Breeding
   { to: '/breeding',       label: 'Breeding Timeline',icon: Baby,            group: 'breeding' },
   { to: '/breeding-pairs', label: 'Breeding Pairs',   icon: Heart,           group: 'breeding' },
   { to: '/molt',           label: 'Molt Tracker',     icon: Shell,           group: 'breeding' },
   { to: '/grades',         label: 'Grade Log',        icon: Star,            group: 'breeding' },
   { to: '/colony',         label: 'Colony Estimator', icon: Users,           group: 'breeding' },
-  // Log & Settings
   { to: '/logbook',        label: 'Logbook',          icon: BookOpen,        group: 'log' },
   { to: '/settings',       label: 'Settings',         icon: Settings,        group: 'log' },
 ]
@@ -36,30 +34,38 @@ const GROUPS: { key: string; label: string }[] = [
 ]
 
 interface SidebarProps {
-  /** Mobile: sidebar is visible */
   isOpen?: boolean
-  /** Mobile: close callback (overlay click or nav) */
   onClose?: () => void
+  triggerRef?: React.RefObject<HTMLButtonElement | null>
 }
 
-export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+export function Sidebar({ isOpen = true, onClose, triggerRef }: SidebarProps) {
   const { mode, toggleMode } = useTheme()
   const { updateSettings } = useData()
+
+  // Only trap focus when used as a mobile overlay (onClose is defined)
+  const isMobileOverlay = onClose !== undefined
+  const trapRef = useFocusTrap({
+    active: isMobileOverlay && (isOpen ?? false),
+    onEscape: onClose,
+    returnFocusRef: triggerRef,
+  })
 
   function handleThemeToggle() {
     const next = mode === 'dark' ? 'light' : 'dark'
     toggleMode()
-    // Keep DataContext / IndexedDB in sync
     updateSettings({ theme: next })
   }
 
   return (
     <nav
       id="sidebar-nav"
+      ref={trapRef as React.RefObject<HTMLElement>}
       className={`sidebar${isOpen ? ' sidebar--open' : ''}`}
       aria-label="Main navigation"
+      aria-modal={isMobileOverlay && isOpen ? 'true' : undefined}
     >
-      {/* ── Brand ─────────────────────────────────────── */}
+      {/* Brand */}
       <div className="sidebar-logo">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Shrimp Lab logo">
           <circle cx="14" cy="14" r="13" stroke="var(--color-primary)" strokeWidth="1.5" />
@@ -80,8 +86,6 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           />
         </svg>
         <span className="sidebar-brand">Shrimp Lab</span>
-
-        {/* Theme toggle — right-aligned in the logo row */}
         <button
           className="btn btn-ghost sidebar__theme-toggle"
           onClick={handleThemeToggle}
@@ -95,7 +99,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </button>
       </div>
 
-      {/* ── Nav groups ────────────────────────────────── */}
+      {/* Nav groups */}
       {GROUPS.map(group => {
         const items = NAV.filter(n => n.group === group.key)
         return (
