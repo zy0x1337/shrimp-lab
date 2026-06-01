@@ -4,7 +4,7 @@ import { estimateHatch } from '../lib/calculators'
 import { useNavigate } from 'react-router-dom'
 import {
   Droplets, Calculator, Timer, BookOpen, Plus, TrendingUp,
-  AlertTriangle, Beaker, Layers, FlaskConical, BarChart2, Waves,
+  AlertTriangle, Beaker, Layers, BarChart2, Waves,
 } from 'lucide-react'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -81,16 +81,15 @@ export function Dashboard() {
 
   const hasAnyData = data.tanks.length > 0 || data.logs.length > 0
 
-  // ── Quick-action config ───────────────────────────────────────────────
   const quickActions = [
-    { to: '/parameters',   icon: Droplets,      label: 'Parameters',    desc: 'Check water values' },
-    { to: '/calculator',   icon: Calculator,    label: 'TDS Calc',      desc: 'Water change planner' },
-    { to: '/remineralize', icon: Beaker,        label: 'Remineralize',  desc: 'RO/DI dosage' },
-    { to: '/breeding',     icon: Timer,         label: 'Breeding',      desc: 'Hatch timeline' },
-    { to: '/logbook',      icon: BookOpen,      label: 'Logbook',       desc: 'Log an entry' },
-    { to: '/charts',       icon: BarChart2,     label: 'Charts',        desc: 'Parameter history' },
-    { to: '/molt',         icon: Layers,        label: 'Molt Tracker',  desc: 'Moult records' },
-    { to: '/colony',       icon: Waves,         label: 'Colony',        desc: 'Population estimate' },
+    { to: '/parameters',   icon: Droplets,  label: 'Parameters',   desc: 'Check water values' },
+    { to: '/calculator',   icon: Calculator,label: 'TDS Calc',     desc: 'Water change planner' },
+    { to: '/remineralize', icon: Beaker,    label: 'Remineralize', desc: 'RO/DI dosage' },
+    { to: '/breeding',     icon: Timer,     label: 'Breeding',     desc: 'Hatch timeline' },
+    { to: '/logbook',      icon: BookOpen,  label: 'Logbook',      desc: 'Log an entry' },
+    { to: '/charts',       icon: BarChart2, label: 'Charts',       desc: 'Parameter history' },
+    { to: '/molt',         icon: Layers,    label: 'Molt Tracker', desc: 'Moult records' },
+    { to: '/colony',       icon: Waves,     label: 'Colony',       desc: 'Population estimate' },
   ]
 
   return (
@@ -125,7 +124,6 @@ export function Dashboard() {
       </div>
 
       {!hasAnyData ? (
-        /* ── Onboarding ─────────────────────────────────────────── */
         <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🦐</div>
           <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.4rem' }}>Welcome to Shrimp Lab</div>
@@ -144,7 +142,6 @@ export function Dashboard() {
         </div>
       ) : (
         <>
-          {/* ── Active breeding alerts ───────────────────────────── */}
           {activeBerried.length > 0 && (
             <section className="dashboard-section">
               <div className="section-header">
@@ -153,8 +150,8 @@ export function Dashboard() {
               </div>
               <div className="grid-2">
                 {activeBerried.slice(0, 4).map(b => {
-                  const isWindow   = b.est.daysRemaining === 0 && b.est.daysElapsed <= b.est.daysMax
-                  const urgent     = !isWindow && b.est.daysRemaining <= 3
+                  const isWindow = b.est.daysRemaining === 0 && b.est.daysElapsed <= b.est.daysMax
+                  const urgent   = !isWindow && b.est.daysRemaining <= 3
                   return (
                     <div key={b.id} className="card breeding-card">
                       <div className="flex-between mb-1">
@@ -168,7 +165,6 @@ export function Dashboard() {
                           {formatSpecies(b.species)}
                         </span>
                       </div>
-
                       <div className="text-xs text-muted" style={{ marginBottom: '0.2rem' }}>
                         {isWindow
                           ? '✓ Hatch window — check for shrimplets'
@@ -177,13 +173,11 @@ export function Dashboard() {
                             : `Day ${b.est.daysElapsed} of ${b.est.daysMin}–${b.est.daysMax}`
                         }
                       </div>
-
                       <HatchProgress
                         daysElapsed={b.est.daysElapsed}
                         daysMin={b.est.daysMin}
                         daysMax={b.est.daysMax}
                       />
-
                       <div className="text-xs text-faint" style={{ marginTop: '0.4rem' }}>
                         Berried {new Date(b.berriedDate).toLocaleDateString('de-DE')} ·{' '}
                         window {b.est.hatchStart.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}–
@@ -196,18 +190,13 @@ export function Dashboard() {
             </section>
           )}
 
-          {/* ── Quick actions ────────────────────────────────────── */}
           <section className="dashboard-section">
             <div className="section-header">
               <span className="section-title">Tools</span>
             </div>
             <div className="quick-actions-grid">
               {quickActions.map(a => (
-                <button
-                  key={a.to}
-                  className="quick-action-btn"
-                  onClick={() => nav(a.to)}
-                >
+                <button key={a.to} className="quick-action-btn" onClick={() => nav(a.to)}>
                   <a.icon size={16} className="quick-action-icon" />
                   <span className="quick-action-label">{a.label}</span>
                   <span className="quick-action-desc">{a.desc}</span>
@@ -216,7 +205,6 @@ export function Dashboard() {
             </div>
           </section>
 
-          {/* ── Tank snapshots ───────────────────────────────────── */}
           {tankSummaries.length > 0 && (
             <section className="dashboard-section">
               <div className="section-header">
@@ -235,7 +223,6 @@ export function Dashboard() {
                         {formatSpecies(tank.species)}
                       </span>
                     </div>
-
                     {latestTest ? (
                       <div>
                         <div className="text-xs text-faint" style={{ marginBottom: '0.4rem' }}>
@@ -245,7 +232,7 @@ export function Dashboard() {
                           {(['tds', 'gh', 'kh', 'ph', 'tempC'] as const).map(param => {
                             const v = latestTest.values?.[param]
                             if (v == null) return null
-                            const range = speciesParams[param === 'tempC' ? 'tempC' : param]
+                            const range   = speciesParams[param === 'tempC' ? 'tempC' : param]
                             const inRange = v >= range.min && v <= range.max
                             const close   = !inRange && (
                               (param === 'ph' && Math.abs(v - range.min) <= 0.5) ||
@@ -291,7 +278,6 @@ export function Dashboard() {
             </section>
           )}
 
-          {/* ── Recent activity ──────────────────────────────────── */}
           {recentLogs.length > 0 && (
             <section className="dashboard-section">
               <div className="section-header">
