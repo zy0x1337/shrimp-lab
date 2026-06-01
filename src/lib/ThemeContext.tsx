@@ -1,7 +1,7 @@
 /**
  * ThemeContext — manages data-style + data-mode on <html>.
- * Reads initial value from DataContext (settings.theme) and keeps them in sync.
- * Also exposes a toggle so any component can flip dark/light.
+ * Default mode: light (unless user has explicitly stored 'dark' in settings,
+ * or their OS preference is dark AND no setting is stored).
  */
 import {
   createContext,
@@ -23,10 +23,12 @@ interface ThemeCtx {
 const ThemeContext = createContext<ThemeCtx | null>(null)
 
 function resolveInitialMode(storedTheme?: string): Mode {
+  // Explicit stored preference always wins
   if (storedTheme === 'light') return 'light'
-  if (storedTheme === 'dark') return 'dark'
-  // Fall back to system preference
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  if (storedTheme === 'dark')  return 'dark'
+  // No stored preference → default to light
+  // (system preference is intentionally ignored as fallback)
+  return 'light'
 }
 
 export function ThemeProvider({
@@ -45,15 +47,15 @@ export function ThemeProvider({
     root.setAttribute('data-mode', mode)
   }, [mode])
 
-  // Keep in sync if the parent DataProvider changes settings.theme externally
+  // Keep in sync if DataProvider changes settings.theme externally
   useEffect(() => {
     if (storedTheme === 'light' || storedTheme === 'dark') {
       setModeState(storedTheme)
     }
   }, [storedTheme])
 
-  const setMode = useCallback((m: Mode) => setModeState(m), [])
-  const toggleMode = useCallback(
+  const setMode     = useCallback((m: Mode) => setModeState(m), [])
+  const toggleMode  = useCallback(
     () => setModeState(prev => (prev === 'dark' ? 'light' : 'dark')),
     []
   )
